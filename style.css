@@ -1,0 +1,109 @@
+/* Global styles */
+body {
+    font-family: Arial, sans-serif;
+    background: url('images/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding-top: 200px;
+    color: #fff;
+    text-align: center; /* Center text by default */
+}
+
+header {
+    position: fixed; /* <-- Add this */
+    width: 100%;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    text-align: center;
+}
+
+
+.header-content {
+    display: flex;
+    justify-content: center; /* Center the logo and navbar */
+    align-items: center;
+}
+
+.logo {
+    max-width: 120px; /* Fixed logo size */
+    margin-right: 20px;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center; /* Center the buttons */
+    align-items: center;
+}
+
+.navbar a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 18px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+/* Drones section */
+.drones-section {
+    padding-top: 120px; /* To avoid overlap with the fixed header */
+    margin-bottom: 50px;
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.drones-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+.drone-card {
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    text-align: center;
+    color: #fff;
+}
+
+.drone-image {
+    width: 200px; /* Fixed size for drone images */
+    height: 200px; /* Fixed height to maintain size consistency */
+    object-fit: cover; /* Ensures images fit within the size without stretching */
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.drone-card h3 {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.drone-card p {
+    font-size: 16px;
+}
+
+.btn {
+    padding: 10px;
+    background-color: #ff6f61;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background-color: #ff4f3e;
+}
