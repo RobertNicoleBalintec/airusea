@@ -92,6 +92,12 @@ header {
     width: 250px;
     text-align: center;
     color: #fff;
+    transition: all 0.3s;
+}
+
+.drone-card:hover {
+  transform: translateZ(100px) scale(1.1);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
 .drone-image {
