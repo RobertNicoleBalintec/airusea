@@ -346,3 +346,20 @@
 [2025-11-13 08:04:28] User logged in: test@example.com
 [2025-11-13 08:04:28] test@example.com
 [2025-11-13 09:07:40] Accessed the main page.
+[2025-11-13 09:22:13] Accessed the main page.
+[2025-11-13 09:22:20] Accessed the main page.
+[2025-11-13 09:22:24] Accessed the main page.
+[2025-11-13 09:23:18] Accessed the main page.
+[2025-11-13 09:23:19] Accessed the main page.
+[2025-11-13 09:23:20] Accessed the main page.
+[2025-11-13 09:24:02] Accessed the main page.
+[2025-11-13 09:24:57] Accessed the main page.
+[2025-11-13 09:25:02] Accessed the main page.
+[2025-11-13 09:25:04] Accessed the main page.
+[2025-11-13 09:25:06] Accessed the main page.
+[2025-11-13 09:25:11] Accessed the main page.
+[2025-11-13 09:27:28] Accessed the main page.
+[2025-11-13 09:31:31] Accessed register page.
+[2025-11-13 09:35:53] Accessed register page.
+[2025-11-13 09:43:57] User logged in: aidren123@gmail.com
+[2025-11-13 09:43:58] aidren123@gmail.com
