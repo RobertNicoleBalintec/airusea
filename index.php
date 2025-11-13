@@ -26,6 +26,12 @@ $stmt = $pdo->query("SELECT * FROM drones");
         </div>
     </header>
 
+    <section class="home-page">
+        <h1>AIR</h1>
+        <h1>ERUSEA</h1>
+        <p style="line-height: 0px; font-size: 20px;">"A site to see the world from above."</p>
+
+    </section>
     <section class="drones-section">
         <h2 class="section-title">Available Drones</h2>
         <div class="drones-container">
