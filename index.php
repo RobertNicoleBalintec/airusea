@@ -43,7 +43,7 @@ $stmt = $pdo->query("SELECT * FROM drones");
                     echo '<img src="' . $imageUrl . '" alt="Drone Image" class="drone-image">';
                     echo '<h3>' . htmlspecialchars($drone['Brand']) . ' ' . htmlspecialchars($drone['Model']) . '</h3>';
                     echo '<p>Price/Day: ₱' . number_format($drone['PricePerDay'], 2) . '</p>';
-                    echo '<a href="rent.php?droneid=' . $drone['DroneID'] . '" class="btn">Rent This Drone</a>';
+                    echo '<a href="rent.php?DroneID=' . $drone['DroneID'] . '" class="btn">Rent This Drone</a>';
                     echo '</div>';
                 }
             } else {

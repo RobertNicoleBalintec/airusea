@@ -500,3 +500,18 @@
 [2025-11-13 11:58:31] Accessed the main page.
 [2025-11-13 11:58:42] Accessed the main page.
 [2025-11-13 11:58:51] Accessed the main page.
+[2025-11-13 12:43:50] Accessed the main page.
+[2025-11-13 12:44:20] User logged in: aidren888@gmail.com
+[2025-11-13 12:44:20] aidren888@gmail.com
+[2025-11-13 12:50:04] aidren888@gmail.com
+[2025-11-13 12:50:11] Accessed the main page.
+[2025-11-13 12:50:44] Accessed the main page.
+[2025-11-13 13:02:43] Accessed the main page.
+[2025-11-13 13:02:54] Accessed the main page.
+[2025-11-13 13:03:11] aidren888@gmail.com
+[2025-11-13 13:03:15] Accessed the main page.
+[2025-11-13 13:03:30] User logged in: aidren888@gmail.com
+[2025-11-13 13:03:30] aidren888@gmail.com
+[2025-11-13 13:03:38] Accessed the main page.
+[2025-11-13 13:03:55] Accessed the main page.
+[2025-11-13 13:04:08] Accessed register page.
