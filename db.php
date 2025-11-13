@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$db = 'airerusea'; 
+$db = 'drone_rental'; 
 $user = 'root';
 $pass = '';        
 $charset = 'utf8mb4';
