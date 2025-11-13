@@ -24,7 +24,7 @@ $stmt = $pdo->query("SELECT * FROM drones");
         <div class="header-content">
             <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
             <nav class="navbar">
-                <a href="dashboard.php">Home</a>
+                <a href="index.php">Home</a>
                 <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
             </nav>
         </div>

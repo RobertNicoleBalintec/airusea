@@ -363,3 +363,20 @@
 [2025-11-13 09:35:53] Accessed register page.
 [2025-11-13 09:43:57] User logged in: aidren123@gmail.com
 [2025-11-13 09:43:58] aidren123@gmail.com
+[2025-11-13 09:47:06] aidren123@gmail.com
+[2025-11-13 09:47:38] aidren123@gmail.com
+[2025-11-13 09:47:40] aidren123@gmail.com
+[2025-11-13 09:47:44] aidren123@gmail.com
+[2025-11-13 09:47:45] aidren123@gmail.com
+[2025-11-13 09:47:45] aidren123@gmail.com
+[2025-11-13 09:48:51] aidren123@gmail.com
+[2025-11-13 09:48:52] Accessed the main page.
+[2025-11-13 09:48:54] Accessed the main page.
+[2025-11-13 09:48:59] aidren123@gmail.com
+[2025-11-13 09:49:01] aidren123@gmail.com
+[2025-11-13 09:49:04] aidren123@gmail.com
+[2025-11-13 09:49:06] Accessed the main page.
+[2025-11-13 09:49:09] aidren123@gmail.com
+[2025-11-13 09:49:12] aidren123@gmail.com
+[2025-11-13 09:49:16] Accessed the main page.
+[2025-11-13 09:49:19] Accessed the main page.
