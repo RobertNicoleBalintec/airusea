@@ -11,10 +11,8 @@ if (!$isAdmin) {
 require 'db.php';
 require 'logger.php';
 
-// Ensure `logAction()` exists before calling it
 if (!function_exists('logAction')) {
     function logAction($userId, $message) {
-        // Placeholder function to prevent fatal errors
         error_log("User $userId: $message");
     }
 }

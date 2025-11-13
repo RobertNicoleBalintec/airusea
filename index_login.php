@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db.php'; // Make sure this connects to your 'airerusea' DB
+require_once 'db.php'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['Email'] ?? '';
@@ -17,13 +17,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           $_SESSION['Email'] = $user['Email'];
           $_SESSION['is_admin'] = strpos($user['Email'], 'airerusea@gmail.com') === 0;
           
-          // Optional logger
           require_once 'logger.php';
           logEvent("User logged in: {$user['Email']}");
           
-          // Redirect based on role
           if ($_SESSION['is_admin']) {
-              header("Location: admin_panel.php"); // Adjust the filename as needed
+              header("Location: admin_panel.php"); 
           } else {
               header("Location: dashboard.php");
           }

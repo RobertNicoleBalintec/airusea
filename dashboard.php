@@ -1,19 +1,15 @@
 <?php
-// Start session and include necessary files
 session_start();
-require_once 'db.php'; // Database connection
-require_once 'logger.php'; // Logger functionality
+require_once 'db.php'; 
+require_once 'logger.php';
 
-// Log page visit
 logEvent($_SESSION['Email'], 'Accessed the dashboard');
 
-// If the user is not logged in, redirect to the login page
 if (!isset($_SESSION['UserID'])) {
     header("Location: index_login.php");
     exit();
 }
 
-// Query to get all drones
 $stmt = $pdo->query("SELECT * FROM drones");
 ?>
 <!DOCTYPE html>
@@ -38,10 +34,8 @@ $stmt = $pdo->query("SELECT * FROM drones");
         <h2 class="section-title">Available Drones</h2>
         <div class="drones-container">
             <?php
-            // Check if there are any drones available in the database
             if ($stmt->rowCount() > 0) {
                 while ($drone = $stmt->fetch()) {
-                    // Get the drone image URL from the database
                     $imageUrl = !empty($drone['ImageURL']) ? "images/" . $drone['ImageURL'] : 'images/default_image.jpg';
                     echo '<div class="drone-card">';
                     echo '<img src="' . $imageUrl . '" alt="Drone Image" class="drone-image">';

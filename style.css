@@ -5,17 +5,17 @@ body {
     background-size: cover;
     margin: 0;
     padding-top: 200px;
-    color: #fff;
-    text-align: center; /* Center text by default */
+    color: black;
+    text-align: center;
 }
 
 header {
-    position: fixed; /* <-- Add this */
+    position: fixed;
     width: 100%;
     top: 0;
     left: 0;
-    padding: 10px;
     background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
     z-index: 1000;
     text-align: center;
 }
@@ -23,35 +23,42 @@ header {
 
 .header-content {
     display: flex;
-    justify-content: center; /* Center the logo and navbar */
+    justify-content: center; 
     align-items: center;
 }
 
 .logo {
-    max-width: 120px; /* Fixed logo size */
+    max-width: 120px;
     margin-right: 20px;
 }
 
 .navbar {
     display: flex;
-    justify-content: center; /* Center the buttons */
+    justify-content: center; 
     align-items: center;
 }
 
 .navbar a {
+    display: inline-block;
     color: #fff;
     text-decoration: none;
+    padding: 12px 12px;
     margin: 0 15px;
     font-size: 18px;
 }
 
 .navbar a:hover {
-    text-decoration: underline;
+    display: inline-block;
+    background-color: #CE5834;
+    font-family:Arial;
+    text-align:center;
+    text-transform:capitalize;
+    padding: 21px 12px;
+    transform: scale(1.0);
 }
 
-/* Drones section */
 .drones-section {
-    padding-top: 120px; /* To avoid overlap with the fixed header */
+    padding-top: 120px;
     margin-bottom: 50px;
 }
 
@@ -70,7 +77,7 @@ header {
 }
 
 .drone-card {
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.7); 
     padding: 20px;
     border-radius: 10px;
     width: 250px;
@@ -79,9 +86,9 @@ header {
 }
 
 .drone-image {
-    width: 200px; /* Fixed size for drone images */
-    height: 200px; /* Fixed height to maintain size consistency */
-    object-fit: cover; /* Ensures images fit within the size without stretching */
+    width: 200px; 
+    height: 200px; 
+    object-fit: cover; 
     border-radius: 5px;
     margin-bottom: 15px;
 }

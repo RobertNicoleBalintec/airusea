@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
-$db = 'airerusea';  // ✅ Your actual DB name
+$db = 'airerusea'; 
 $user = 'root';
-$pass = '';         // ✅ Or your password
+$pass = '';        
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

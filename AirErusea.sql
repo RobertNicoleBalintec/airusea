@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS drone_rental;
-USE drone_rental;
+CREATE DATABASE IF NOT EXISTS airerusea;
+USE airerusea;
 
 CREATE TABLE categories (
     CategoryID INT AUTO_INCREMENT PRIMARY KEY,

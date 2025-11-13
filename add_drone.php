@@ -11,16 +11,13 @@ if (!$isAdmin) {
 require 'db.php';
 require 'logger.php';
 
-// Check if logAction() exists in logger.php before calling
 if (!function_exists('logAction')) {
     function logAction($userId, $message) {
-        // Placeholder function to prevent fatal errors
         error_log("User $userId: $message");
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validate POST data to prevent undefined index warnings
     $brand = $_POST['brand'] ?? null;
     $model = $_POST['model'] ?? null;
     $categoryId = $_POST['CategoryID'] ?? null;
@@ -28,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pricePerDay = $_POST['PricePerDay'] ?? null;
     $quantityAvailable = $_POST['QuantityAvailable'] ?? null;
 
-    // Image upload handling
     $image = $_FILES['image']['name'] ?? null;
     if ($image) {
         $targetDir = "images/";
@@ -38,10 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
     } else {
-        $image = "default.jpg"; // Fallback image if none is uploaded
+        $image = "default.jpg"; 
     }
-
-    // Insert drone into database
+    
     $stmt = $pdo->prepare("INSERT INTO drones (Brand, Model, CategoryID, WingTypeID, PricePerDay, QuantityAvailable, ImageURL) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$brand, $model, $categoryId, $wingTypeId, $pricePerDay, $quantityAvailable, $image]);
 

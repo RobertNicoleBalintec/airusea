@@ -1,4 +1,3 @@
-// Function to filter drones by category
 function filterByType(type) {
   const drones = document.querySelectorAll('.drone-card');
   drones.forEach(drone => {
@@ -10,7 +9,6 @@ function filterByType(type) {
   });
 }
 
-// Search functionality for drones
 function filterDrones() {
   const searchTerm = document.getElementById('search').value.toLowerCase();
   const drones = document.querySelectorAll('.drone-card');
@@ -24,5 +22,5 @@ function filterDrones() {
   });
 }
 
-// Initial filter to show all drones
+
 filterByType('all');

@@ -1,12 +1,9 @@
 <?php
-// Include database connection and logger functionality
 include('db.php');
 include('logger.php');
 
-// Log the access (ensure logEvent is defined in your logger file)
 logEvent("Accessed the main page.");
 
-// Query to get all drones
 $stmt = $pdo->query("SELECT * FROM drones");
 ?>
 <!DOCTYPE html>
@@ -33,10 +30,8 @@ $stmt = $pdo->query("SELECT * FROM drones");
         <h2 class="section-title">Available Drones</h2>
         <div class="drones-container">
             <?php
-            // Check if there are any drones available in the database
             if ($stmt->rowCount() > 0) {
                 while ($drone = $stmt->fetch()) {
-                    // Get the drone image URL from the database
                     $imageUrl = !empty($drone['ImageURL']) ? "images/" . $drone['ImageURL'] : 'images/default_image.jpg';
                     echo '<div class="drone-card">';
                     echo '<img src="' . $imageUrl . '" alt="Drone Image" class="drone-image">';

@@ -1,16 +1,13 @@
 <?php
-// Include your database connection
 include('db.php');
 include('logger.php');
 
-// Log the access (assuming logEvent is available in logger.php)
 logEvent("Accessed register page.");
 
 $error_message = "";
 
-// Check if the form has been submitted via POST method
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ensure name, email, and password fields are set before processing
+
     if (isset($_POST['name']) && isset($_POST['email']) && isset($_POST['password'])) {
         $name = $_POST['name'];
         $email = $_POST['email'];
@@ -18,21 +15,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $phone = $_POST['phone'];
         $address = $_POST['address'];
 
-        // Hash the password before storing
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Query to check if the email already exists
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
 
-        // If the email exists
         if ($stmt->rowCount() > 0) {
             $error_message = "This email is already registered.";
         } else {
-            // Insert the new user into the database
             $stmt = $pdo->prepare("INSERT INTO users (name, email, password, phone, address) VALUES (?, ?, ?, ?, ?)");
             if ($stmt->execute([$name, $email, $hashed_password, $phone, $address])) {
-                // Registration successful, redirect to login page
                 header("Location: index_login.php");
                 exit();
             } else {
@@ -40,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
-        // Missing required fields
         $error_message = "Please fill out all fields.";
     }
 }
@@ -57,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <h2>Register</h2>
 
-        <!-- Display error message if any -->
         <?php if (!empty($error_message)): ?>
             <div class="error-message">
                 <?php echo htmlspecialchars($error_message); ?>
