@@ -76,11 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <header>
-        <h1>Rent A Drone</h1>
         <div class="header-content">
             <nav class="navbar">
+                <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
                 <a href="index.php">Home</a>
                 <a href="drones.php">All Drones</a>
+                <a href="chest.php">Chest</a>
             </nav>
         </div>
     </header>

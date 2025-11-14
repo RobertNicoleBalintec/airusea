@@ -38,9 +38,10 @@ $rentedStmt->execute();
     <header>
         <div class="header-content">
             <nav class="navbar">
+                <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
                 <a href="index.php">Home</a>
-                <a href="#available-drones">Available Drones</a>
-                <a href="#rented-drones">Out for Rental Drones</a>
+                <a href="#available-drones">Available</a>
+                <a href="#rented-drones">Deployed</a>
             </nav>
         </div>
     </header>
