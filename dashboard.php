@@ -5,10 +5,6 @@ require_once 'logger.php';
 
 logEvent($_SESSION['Email'], 'Accessed the dashboard');
 
-if (!isset($_SESSION['UserID'])) {
-    header("Location: index_login.php");
-    exit();
-}
 
 $stmt = $pdo->query("SELECT * FROM drones");
 ?>

@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <h1>Rent A Drone</h1>
         <div class="header-content">
             <nav class="navbar">
-                <a href="dashboard.php">Home</a>
+                <a href="index.php">Home</a>
                 <a href="drones.php">All Drones</a>
             </nav>
         </div>

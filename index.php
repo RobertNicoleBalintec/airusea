@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 include('db.php');
 include('logger.php');
 
@@ -19,10 +21,16 @@ $stmt = $pdo->query("SELECT * FROM drones");
             <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
             <nav class="navbar">
                 <a href="index.php">Home</a>
-                <a href="rent.php">Rent A Drone</a>
-                <a href="index_login.php">Login</a>
-                <a href="register.php">Sign Up</a>
+                <a href="drones.php">Rent A Drone</a>
+
+                <?php if (isset($_SESSION['UserID'])): ?>
+                    <a href="logout.php">Logout</a>
+                <?php else: ?>
+                    <a href="index_login.php">Login</a>
+                    <a href="register.php">Sign Up</a>
+                <?php endif; ?>
             </nav>
+
         </div>
     </header>
 
@@ -33,7 +41,7 @@ $stmt = $pdo->query("SELECT * FROM drones");
 
     </section>
     <section class="drones-section">
-        <h2 class="section-title">Available Drones</h2>
+        <h2 class="section-title">Customer's Pick</h2>
         <div class="drones-container">
             <?php
             if ($stmt->rowCount() > 0) {

@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           if ($_SESSION['is_admin']) {
               header("Location: admin_panel.php"); 
           } else {
-              header("Location: dashboard.php");
+              header("Location: drones.php");
           }
           exit();
           
@@ -55,6 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <label>Password:</label>
       <input type="password" name="Password" required>
       <button type="submit">Login</button>
+      <p>Don't have an account yet? <a href="register.php">Sign Up</a></p>
     </form>
     <p><a href="index.php">← Back to Home</a></p>
   </div>
