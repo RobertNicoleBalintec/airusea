@@ -1,4 +1,4 @@
-/* Global styles */
+/*MAIN PAGE CSS*/
 body {
     font-family: Arial, sans-serif;
     background: url('images/background.jpg') no-repeat center center fixed;
@@ -19,7 +19,6 @@ header {
     z-index: 1000;
     text-align: center;
 }
-
 
 .header-content {
     display: flex;
@@ -146,7 +145,7 @@ html {
     border-color: #ff4d4d;
     background: #ffe6e6;
 }
-
+/*LOGIN FORM CSS*/
 .container-login {
     max-width: 200px;
     width: 50%;
@@ -282,7 +281,7 @@ main {
     margin: auto;
     padding-top: 30px;
 }
-
+/* SIGN UP FORM CSS*/
 .container-signup {
     max-width: 600px;
     width: 90%;
@@ -356,6 +355,60 @@ main {
     }
 }
 
+/*Drones for rent css*/
+.header-search {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: -90px;
+}
+
+.search-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 14px 18px;
+    font-size: 16px;
+    border-radius: 8px 0 0 8px;
+    border: 2px solid #ddd;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.search-bar input:focus {
+    border-color: #CE5834;
+}
+
+.search-bar button{
+    padding: 14px 22px;
+    font-size: 16px
+    border-radius: 0 8px 8px 0;
+    background: #CE5834;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.search-bar button:hover {
+    background-color: #a9432a;
+}
+
+
+#available-drones, #rented-drones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
+    padding: 20px 0 40px;
+}
+
 #available-drones h2,
 #rented-drones h2 {
     font-size: 32px;
@@ -363,29 +416,23 @@ main {
     color: white;
     margin: 40px 0 20px;
     text-shadow: 2px 2px 4px black;
-    text-align: left;
-}
-
-#available-drones,
-#rented-drones {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 25px;
-    padding-bottom: 40px;
+    text-align: center;
 }
 
 .drone {
+    align-items: baseline;
     background: rgba(0, 0, 0, 0.7);
     padding: 20px;
     border-radius: 12px;
     color: white;
     text-align: center;
     box-shadow: 0 5px 12px rgba(0,0,0,0.4);
-    transition: 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .drone:hover {
     transform: translateY(-6px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.5);
 }
 
 .drone img {
@@ -399,10 +446,21 @@ main {
 .drone.rented {
     border-left: 5px solid #ff4d4d;
     background: rgba(255, 100, 100, 0.15);
+    color: #d32f2f;
 }
 
-.btn {
+.drone h2, .drone h3 {
+    margin: 10px 0;
+}
+
+.drone p {
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.drone a.btn {
     display: inline-block;
+    margin-top: 10px;
     padding: 12px 18px;
     background: #CE5834;
     color: white;
@@ -412,6 +470,19 @@ main {
     transition: background 0.3s;
 }
 
-.btn:hover {
+.drone a.btn:hover {
     background: #a9442c;
+}
+
+@media (max-width: 768px) {
+    #available-drones, #rented-drones {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    #available-drones, #rented-drones {
+        grid-template-columns: 1fr;
+        padding: 10px 0;
+    }
 }

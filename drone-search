@@ -1,0 +1,15 @@
+        <?php if ($showSearchResults): ?>
+            <h2>Search Results</h2>
+
+            <?php if (empty($searchResults)): ?>
+                <p>No matching drones found.</p>
+            <?php endif; ?>
+
+            <?php foreach ($searchResults as $drone): ?>
+                <div class="drone">
+                    <h3><?= htmlspecialchars($drone['Model']) ?></h3>
+                    <img src="images/<?= htmlspecialchars($drone['ImageURL']) ?>">
+                    <p>Price/Day: $<?= htmlspecialchars($drone['PricePerDay']) ?></p>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
