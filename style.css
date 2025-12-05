@@ -296,8 +296,8 @@ main {
 }
 
 .container-signup h2 {
-    margin-top: 0;    /* move it up */
-    margin-bottom: 20px; /* space between h2 and form */
+    margin-top: 0;
+    margin-bottom: 20px;
 }
 
 .signup-grid {
@@ -388,7 +388,6 @@ main {
     transform: translateY(-6px);
 }
 
-/* Drone image */
 .drone img {
     width: 100%;
     height: 180px;
@@ -397,13 +396,11 @@ main {
     margin-bottom: 12px;
 }
 
-/* Rented drones (highlighted) */
 .drone.rented {
     border-left: 5px solid #ff4d4d;
     background: rgba(255, 100, 100, 0.15);
 }
 
-/* Buttons */
 .btn {
     display: inline-block;
     padding: 12px 18px;

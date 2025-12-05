@@ -14,7 +14,6 @@ $query = "SELECT * FROM drones";
 $stmt = $pdo->prepare($query);
 $stmt->execute();
 
-# Fetch RENTED drones (currently out for rental)
 $rentedQuery = "
     SELECT d.*, r.RentStart, r.RentEnd, u.Email
     FROM drones d

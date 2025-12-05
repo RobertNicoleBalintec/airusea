@@ -6,7 +6,15 @@ include('logger.php');
 
 logEvent("Accessed the main page.");
 
-$stmt = $pdo->query("SELECT * FROM drones");
+$stmt = $pdo->query("
+    SELECT d.*, COUNT(r.RentalID) AS rent_count
+    FROM drones d
+    LEFT JOIN rentals r using (DroneID)
+    GROUP BY d.DroneID
+    ORDER BY rent_count DESC
+    LIMIT 6
+");
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

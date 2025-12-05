@@ -782,3 +782,9 @@
 [2025-12-05 11:27:46] Accessed register page.
 [2025-12-05 11:27:57] Accessed register page.
 [2025-12-05 11:28:02] Accessed the main page.
+[2025-12-05 11:43:20] Accessed the main page.
+[2025-12-05 11:46:09] Accessed the main page.
+[2025-12-05 11:47:44] User logged in: aidren888@gmail.com
+[2025-12-05 11:47:44] aidren888@gmail.com
+[2025-12-05 11:48:35] aidren888@gmail.com
+[2025-12-05 11:48:50] aidren888@gmail.com
