@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="container-signup">
         <h2>Register</h2>
 
         <?php if (!empty($error_message)): ?>
@@ -54,21 +54,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <form action="register.php" method="POST">
-            <label>Name:</label>
-            <input type="text" name="name" required>
-            <label>Email:</label>
-            <input type="email" name="email" required>
-            <label>Password:</label>
-            <input type="password" name="password" required>
-            <label>Phone:</label>
-            <input type="text" name="phone">
-            <label>Address:</label>
-            <textarea name="address" rows="3"></textarea>
-            <button type="submit">Register</button>
-        </form>
+        <form action="register.php" method="POST" class="signup-grid">
 
-        <p><a href="index_login.php">Already have an account? Login here</a></p>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="text" name="phone">
+            </div>
+
+            <div class="form-group full-width">
+                <label>Address:</label>
+                <textarea name="address" rows="1"></textarea>
+            </div>
+
+            <button type="submit" class="full-width">Register</button>
+
+        </form>
+        <p>Already have an account? <a href="index_login.php">Login here</a></p>
     </div>
 </body>
 </html>

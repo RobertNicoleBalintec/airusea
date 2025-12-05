@@ -51,7 +51,7 @@ $rentedStmt->execute();
             <?php while ($drone = $stmt->fetch()): ?>
                 <div class="drone">
                     <h2><?php echo htmlspecialchars($drone['Model']); ?></h2>
-                    <img src="images/<?php echo htmlspecialchars($drone['ImageURL']); ?>" alt="<?php echo htmlspecialchars($drone['Model']); ?>" style="width: 30%; height: auto; object-fit: cover; border-radius: 20px;" />
+                    <img src="images/<?php echo htmlspecialchars($drone['ImageURL']); ?>" alt="<?php echo htmlspecialchars($drone['Model']); ?>"/>
                     <p>Price/Day: $<?php echo htmlspecialchars($drone['PricePerDay']); ?></p>
                     <a href="rent.php?DroneID=<?php echo $drone['DroneID']; ?>" class="btn btn-primary">Rent This Drone</a>
                 </div>
