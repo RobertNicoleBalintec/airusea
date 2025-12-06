@@ -1,7 +1,10 @@
 <?php
 session_start();
-require_once 'db.php'; 
-
+require_once 'db.php';
+if (isset($_SESSION['UserID'])) {
+    header("Location: index.php"); // or your dashboard/home
+    exit();
+}
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['Email'] ?? '';
     $password = $_POST['Password'] ?? '';
@@ -44,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+  <div class="container-login">
     <h2>Login</h2>
     <?php if (!empty($error)): ?>
       <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
