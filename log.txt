@@ -638,3 +638,39 @@
 [2025-11-14 07:12:15] Accessed the main page.
 [2025-11-14 07:12:37] aidren888@gmail.com
 [2025-11-14 07:12:47] Accessed the main page.
+[2025-12-06 06:00:44] 
+[2025-12-06 06:01:21] 
+[2025-12-06 06:01:33] 
+[2025-12-06 06:05:28] 
+[2025-12-06 06:05:37] 
+[2025-12-06 06:31:52] Accessed the main page.
+[2025-12-06 06:33:20] Accessed the main page.
+[2025-12-06 06:33:26] Accessed the main page.
+[2025-12-06 06:33:35] Accessed the main page.
+[2025-12-06 06:35:40] Accessed the main page.
+[2025-12-06 06:35:50] 
+[2025-12-06 06:35:57] 
+[2025-12-06 06:46:01] Accessed the main page.
+[2025-12-06 06:46:42] Accessed register page.
+[2025-12-06 06:47:26] Accessed register page.
+[2025-12-06 06:47:50] User logged in: mandrezajorie13@gmail.com
+[2025-12-06 06:47:50] mandrezajorie13@gmail.com
+[2025-12-06 06:50:25] Accessed the main page.
+[2025-12-06 06:50:28] mandrezajorie13@gmail.com
+[2025-12-06 06:50:43] Accessed the main page.
+[2025-12-06 06:50:45] Accessed the main page.
+[2025-12-06 06:50:47] Accessed the main page.
+[2025-12-06 06:50:48] Accessed the main page.
+[2025-12-06 06:51:11] User logged in: mandrezajorie13@gmail.com
+[2025-12-06 06:51:11] mandrezajorie13@gmail.com
+[2025-12-06 06:51:13] Accessed the main page.
+[2025-12-06 06:51:25] mandrezajorie13@gmail.com
+[2025-12-06 06:51:53] mandrezajorie13@gmail.com
+[2025-12-06 06:55:31] Accessed the main page.
+[2025-12-06 06:55:39] Accessed the main page.
+[2025-12-06 06:55:41] Accessed the main page.
+[2025-12-06 06:55:41] mandrezajorie13@gmail.com
+[2025-12-06 06:55:54] Accessed the main page.
+[2025-12-06 06:55:55] mandrezajorie13@gmail.com
+[2025-12-06 07:11:27] mandrezajorie13@gmail.com
+[2025-12-06 07:33:06] Accessed the main page.
