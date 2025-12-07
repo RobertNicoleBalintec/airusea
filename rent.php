@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $PaymentMethodID = $_POST['PaymentMethodID'];
         $totalCost = $drone['PricePerDay'] * 3;
 
-        $query = "INSERT INTO rentals (UserID, DroneID, RentStart, RentEnd, TotalCost) VALUES (:UserID, :DroneID, NOW(), DATE_ADD(NOW(), INTERVAL 3 DAY), :totalCost)";
+        $query = "INSERT INTO rentals (UserID, DroneID, RentStart, RentEnd, TotalCost) VALUES (:UserID, :DroneID, DATE_ADD(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 4 DAY), :totalCost)";
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':UserID', $UserID);
         $stmt->bindParam(':DroneID', $DroneID);
@@ -105,8 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?php endforeach; ?>
                 </select>
                 <button type="submit" name="confirm_rental" class="btn btn-primary">Confirm Rental</button>
-                <button type="submit" name="cancel_rental" class="btn btn-danger">Cancel Rental</button>
             </form>
+            <p><a href="drones.php" class="btn btn-danger">Cancel and Go Back</a></p>
         <?php else: ?>
             <p>No drone selected.</p>
         <?php endif; ?>

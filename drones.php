@@ -3,7 +3,7 @@ session_start();
 require_once 'db.php';
 require_once 'logger.php';
 
-logEvent($_SESSION['Email'], 'Accessed the drones');
+logEvent($_SESSION['Email'] ?? 'Guest', 'Accessed the drones page');
 
 if (!isset($_SESSION['UserID'])) {
     header("Location: index_login.php");
@@ -59,11 +59,15 @@ $rentedStmt->execute();
    
     <header>
         <div class="header-content">
+            <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
             <nav class="navbar">
-                <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
                 <a href="index.php">Home</a>
                 <a href="#available-drones">Available</a>
                 <a href="#rented-drones">Deployed</a>
+                <!-- ADDED: My Rentals Button -->
+                <a href="chest.php" class="my-rentals-btn">My Rentals</a>
+                <a href="dashboard.php">Dashboard</a>
+                <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
             </nav>
         </div>
     </header>
@@ -71,7 +75,8 @@ $rentedStmt->execute();
     <main>
         <div class="header-search">
             <form method="GET" action="drones.php" class="search-bar">
-                <input type="text" name="query" placeholder="Search by model, price, brand, motor type..." />`<button type="submit">Search</button>
+                <input type="text" name="query" placeholder="Search by model, price, brand, motor type..." />
+                <button type="submit">Search</button>
             </form>
         </div>
 

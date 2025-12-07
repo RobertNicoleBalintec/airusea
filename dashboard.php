@@ -3,10 +3,21 @@ session_start();
 require_once 'db.php'; 
 require_once 'logger.php';
 
+// Check if user is logged in
+if (!isset($_SESSION['UserID'])) {
+    header('Location: index_login.php');
+    exit();
+}
+
 logEvent($_SESSION['Email'], 'Accessed the dashboard');
 
-
 $stmt = $pdo->query("SELECT * FROM drones");
+
+// Fetch user's name for the welcome message
+$user_stmt = $pdo->prepare("SELECT Name FROM users WHERE UserID = ?");
+$user_stmt->execute([$_SESSION['UserID']]);
+$user = $user_stmt->fetch();
+$display_name = !empty($user['Name']) ? $user['Name'] : $_SESSION['Email'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,10 +32,25 @@ $stmt = $pdo->query("SELECT * FROM drones");
             <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
             <nav class="navbar">
                 <a href="index.php">Home</a>
+                <a href="drones.php">Rent A Drone</a>
+                <!-- ADDED: My Rentals Button -->
+                <a href="chest.php" class="my-rentals-btn">My Rentals</a>
                 <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
             </nav>
         </div>
     </header>
+
+    <!-- Added dashboard header section -->
+    <div class="dashboard-header">
+        <h1>Welcome to Your Dashboard</h1>
+        <p>Browse and rent from our available drone collection</p>
+    </div>
+    
+    <!-- Welcome message with user's NAME (not email) -->
+    <div class="welcome-message">
+        <p>Hello, <strong><?php echo htmlspecialchars($display_name); ?></strong>! 
+        You can view your current rentals by clicking the <strong>"My Rentals"</strong> button above.</p>
+    </div>
 
     <section class="drones-section">
         <h2 class="section-title">Available Drones</h2>
@@ -41,7 +67,7 @@ $stmt = $pdo->query("SELECT * FROM drones");
                     echo '</div>';
                 }
             } else {
-                echo "<p>No drones available at the moment.</p>";
+                echo "<p style='color: white;'>No drones available at the moment.</p>";
             }
             ?>
         </div>

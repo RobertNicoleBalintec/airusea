@@ -32,13 +32,15 @@ $stmt = $pdo->query("
                 <a href="drones.php">Rent A Drone</a>
 
                 <?php if (isset($_SESSION['UserID'])): ?>
+                    <!-- ADDED: My Rentals Button for logged-in users -->
+                    <a href="chest.php" class="my-rentals-btn">My Rentals</a>
+                    <a href="dashboard.php">Dashboard</a>
                     <a href="logout.php">Logout</a>
                 <?php else: ?>
                     <a href="index_login.php">Login</a>
                     <a href="register.php">Sign Up</a>
                 <?php endif; ?>
             </nav>
-
         </div>
     </header>
 
@@ -46,8 +48,8 @@ $stmt = $pdo->query("
         <h1>AIR</h1>
         <h1>ERUSEA</h1>
         <p style="line-height: 0px; font-size: 20px;">"A site to see the world from above."</p>
-
     </section>
+    
     <section class="drones-section">
         <h2 class="section-title">Customer's Pick</h2>
         <div class="drones-container">
