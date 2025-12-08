@@ -15,22 +15,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['Password'])) {
-          $_SESSION['UserID'] = $user['UserID'];
-          $_SESSION['Email'] = $user['Email'];
-          $_SESSION['is_admin'] = strpos($user['Email'], 'airerusea@gmail.com') === 0;
-          
-          require_once 'logger.php';
-          logEvent("User logged in: {$user['Email']}");
-          
-          if ($_SESSION['is_admin']) {
-              header("Location: admin_panel.php"); 
-          } else {
+        if ($user && $password === $user['Password']) { 
+           $_SESSION['UserID'] = $user['UserID'];
+           $_SESSION['Email'] = $user['Email'];
+           $_SESSION['is_admin'] = (int)$user['is_admin']; 
+
+           require_once 'logger.php';
+           logEvent("User logged in: {$user['Email']}");
+
+           if ($_SESSION['is_admin']) {
+              header("Location: admin_panel.php");
+           } else {
               header("Location: drones.php");
-          }
-          exit();
-          
-        } else {
+           }
+            exit();
+      }
+      else {
             $error = "Invalid email or password.";
         }
     } else {
@@ -64,3 +64,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </div>
 </body>
 </html>
+
