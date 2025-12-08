@@ -41,7 +41,7 @@ try {
     $delete_stmt = $pdo->prepare("DELETE FROM drones WHERE DroneID = ?");
     $delete_stmt->execute([$drone_id]);
     
-    logAction($_SESSION['UserID'], "Removed drone ID: $drone_id ({$drone['Brand']} {$drone['Model']})");
+    logEvent($_SESSION['UserID'], "Removed drone ID: $drone_id ({$drone['Brand']} {$drone['Model']})");
     
     header('Location: admin_panel.php?success=removed');
     exit();

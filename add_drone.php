@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $image_name
         ]);
         
-        logAction($_SESSION['UserID'], "Added new drone: $brand $model");
+        logEvent($_SESSION['UserID'], "Added new drone: $brand $model");
         
         header('Location: admin_panel.php?success=1');
         exit();
