@@ -1,9 +1,8 @@
 <?php
 require 'auth.php';
 requireLogin();
-$isAdmin = isAdmin();
 
-if (!$isAdmin) {
+if (!isAdmin()) {
     header('Location: dashboard.php');
     exit();
 }
@@ -11,23 +10,43 @@ if (!$isAdmin) {
 require 'db.php';
 require 'logger.php';
 
-if (!function_exists('logAction')) {
-    function logAction($userId, $message) {
-        error_log("User $userId: $message");
-    }
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header('Location: admin_panel.php?error=invalid_id');
+    exit();
 }
 
-if (isset($_GET['id'])) {
-    $droneId = $_GET['id'];
+$drone_id = intval($_GET['id']);
 
-    $stmt = $pdo->prepare("DELETE FROM drones WHERE DroneID = ?");
-    $stmt->execute([$droneId]);
-
-    logAction($_SESSION['UserID'], "Removed drone ID: $droneId");
-
-    header('Location: admin_panel.php');
+try {
+    // Check if drone exists
+    $stmt = $pdo->prepare("SELECT * FROM drones WHERE DroneID = ?");
+    $stmt->execute([$drone_id]);
+    $drone = $stmt->fetch();
+    
+    if (!$drone) {
+        header('Location: admin_panel.php?error=drone_not_found');
+        exit();
+    }
+    
+    // Check if drone has active rentals
+    $rental_check = $pdo->prepare("SELECT * FROM rentals WHERE DroneID = ? AND RentEnd >= NOW()");
+    $rental_check->execute([$drone_id]);
+    
+    if ($rental_check->rowCount() > 0) {
+        header('Location: admin_panel.php?error=drone_has_active_rentals');
+        exit();
+    }
+    
+    // Delete drone
+    $delete_stmt = $pdo->prepare("DELETE FROM drones WHERE DroneID = ?");
+    $delete_stmt->execute([$drone_id]);
+    
+    logAction($_SESSION['UserID'], "Removed drone ID: $drone_id ({$drone['Brand']} {$drone['Model']})");
+    
+    header('Location: admin_panel.php?success=removed');
     exit();
-} else {
-    echo "<p style='color: red;'>Error: Drone ID not specified!</p>";
+    
+} catch (PDOException $e) {
+    die("Error removing drone: " . $e->getMessage());
 }
 ?>
