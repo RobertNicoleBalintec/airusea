@@ -2,11 +2,19 @@
 // chest.php - Updated with Cancellation Feature
 session_start();
 require_once 'db.php';
+require_once 'auth.php'; // ADD THIS LINE
+
+// PREVENT ADMINS FROM ACCESSING MY RENTALS - ADD THIS CHECK
+if (isAdmin()) {
+    header("Location: dashboard.php");
+    exit();
+}
 
 // Check if user is logged in
 if (!isset($_SESSION['UserID'])) {
     header('Location: index_login.php');
     exit();
+
 }
 
 // Display success message if cancellation was successful
@@ -349,7 +357,9 @@ foreach ($rentals as $rental) {
             <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
             <nav class="navbar">
                 <a href="index.php">Home</a>
-                <a href="drones.php">Rent A Drone</a>
+                <?php if (!isAdmin()): ?>
+                    <a href="drones.php">Rent A Drone</a>
+                 <?php endif; ?>
                 <a href="dashboard.php">Dashboard</a>
                 <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
             </nav>

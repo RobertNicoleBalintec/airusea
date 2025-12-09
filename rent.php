@@ -1,14 +1,18 @@
 <?php
+
 session_start();
 require 'db.php'; 
+require 'auth.php'; // ADD THIS LINE
 
-if (!isset($_SESSION['UserID'])) {
-    header('Location: index_login.php');
+// PREVENT ADMINS FROM RENTING - ADD THIS CHECK
+if (isAdmin()) {
+    $_SESSION['error'] = "Administrators cannot rent drones. Please use a regular user account.";
+    header("Location: dashboard.php");
     exit();
 }
 
-if (!isset($_GET['DroneID']) || empty($_GET['DroneID'])) {
-    echo "<p style='color: red;'>Error: No drone selected.</p>";
+if (!isset($_SESSION['UserID'])) {
+    header('Location: index_login.php');
     exit();
 }
 
@@ -242,8 +246,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <nav class="navbar">
                 <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
                 <a href="index.php">Home</a>
-                <a href="drones.php">All Drones</a>
-                <a href="chest.php">Chest</a>
+                <?php if (!isAdmin()): ?>
+                    <a href="drones.php">All Drones</a>
+                    <a href="chest.php">Chest</a>
+                <?php endif; ?>
+                <a href="dashboard.php">Dashboard</a>
             </nav>
         </div>
     </header>

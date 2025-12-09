@@ -2,11 +2,18 @@
 session_start();
 require_once 'db.php';
 require_once 'logger.php';
+require_once 'auth.php'; // ADD THIS LINE
 
 logEvent($_SESSION['Email'] ?? 'Guest', 'Accessed the drones page');
 
 if (!isset($_SESSION['UserID'])) {
     header("Location: index_login.php");
+    exit();
+}
+
+// CHECK IF USER IS ADMIN - REDIRECT IF THEY ARE
+if (isAdmin()) {
+    header("Location: dashboard.php");
     exit();
 }
 
