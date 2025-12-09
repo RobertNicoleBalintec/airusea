@@ -1,5 +1,8 @@
 <?php
-session_start();
+// Check if session is not already started before starting it
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 function requireLogin() {
     if (!isset($_SESSION['UserID'])) {

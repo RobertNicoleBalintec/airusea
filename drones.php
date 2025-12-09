@@ -2,28 +2,22 @@
 session_start();
 require_once 'db.php';
 require_once 'logger.php';
+require_once 'auth.php'; // ADD THIS LINE
 
-logEvent($_SESSION['Email'], 'Accessed the drones');
+logEvent($_SESSION['Email'] ?? 'Guest', 'Accessed the drones page');
 
 if (!isset($_SESSION['UserID'])) {
     header("Location: index_login.php");
     exit();
 }
 
-$query = "SELECT * FROM drones WHERE 1";
-
-$params = [];
-
-if (!empty($_GET['query'])) {
-    $search = '%' . $_GET['query'] . '%';
-    $query .= " AND (Model LIKE :search OR Brand LIKE :search OR PricePerDay LIKE :search)";
-    $params[':search'] = $search;
+// CHECK IF USER IS ADMIN - REDIRECT IF THEY ARE
+if (isAdmin()) {
+    header("Location: dashboard.php");
+    exit();
 }
 
-$stmt = $pdo->prepare($query);
-$stmt->execute($params);
-
-
+// SINGLE query for available drones
 $query = "
     SELECT * FROM drones
     WHERE DroneID NOT IN (
@@ -32,10 +26,17 @@ $query = "
         WHERE RentEnd >= NOW()
     )
 ";
+$params = [];
+
+if (!empty($_GET['query'])) {
+    $query .= " AND (Model LIKE :search OR Brand LIKE :search OR PricePerDay LIKE :search)";
+    $params[':search'] = "%" . $_GET['query'] . "%";
+}
+
 $stmt = $pdo->prepare($query);
-$stmt->execute();
+$stmt->execute($params);
 
-
+// Query for rented drones (unchanged)
 $rentedQuery = "
     SELECT d.*, r.RentStart, r.RentEnd, u.Email
     FROM drones d
@@ -59,11 +60,15 @@ $rentedStmt->execute();
    
     <header>
         <div class="header-content">
+            <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
             <nav class="navbar">
-                <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
                 <a href="index.php">Home</a>
                 <a href="#available-drones">Available</a>
                 <a href="#rented-drones">Deployed</a>
+                <!-- ADDED: My Rentals Button -->
+                <a href="chest.php" class="my-rentals-btn">My Rentals</a>
+                <a href="dashboard.php">Dashboard</a>
+                <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
             </nav>
         </div>
     </header>
@@ -71,11 +76,20 @@ $rentedStmt->execute();
     <main>
         <div class="header-search">
             <form method="GET" action="drones.php" class="search-bar">
-                <input type="text" name="query" placeholder="Search by model, price, brand, motor type..." />`<button type="submit">Search</button>
+                <input type="text" name="query" placeholder="Search by model, price, brand, motor type..." 
+                       value="<?php echo htmlspecialchars($_GET['query'] ?? ''); ?>" />
+                <button type="submit">Search</button>
+                <?php if (!empty($_GET['query'])): ?>
+                    <a href="drones.php" class="clear-search">Clear Search</a>
+                <?php endif; ?>
             </form>
         </div>
 
         <section id="available-drones">
+            <?php if ($stmt->rowCount() === 0): ?>
+                <p>No drones available<?php echo !empty($_GET['query']) ? ' matching your search.' : '.'; ?></p>
+            <?php endif; ?>
+            
             <?php while ($drone = $stmt->fetch()): ?>
                 <div class="drone">
                     <h2><?php echo htmlspecialchars($drone['Model']); ?></h2>

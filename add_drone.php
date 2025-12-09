@@ -1,9 +1,8 @@
 <?php
 require 'auth.php';
 requireLogin();
-$isAdmin = isAdmin();
 
-if (!$isAdmin) {
+if (!isAdmin()) {
     header('Location: dashboard.php');
     exit();
 }
@@ -11,37 +10,62 @@ if (!$isAdmin) {
 require 'db.php';
 require 'logger.php';
 
-if (!function_exists('logAction')) {
-    function logAction($userId, $message) {
-        error_log("User $userId: $message");
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $brand = $_POST['brand'] ?? null;
-    $model = $_POST['model'] ?? null;
-    $categoryId = $_POST['CategoryID'] ?? null;
-    $wingTypeId = $_POST['WingTypeID'] ?? null;
-    $pricePerDay = $_POST['PricePerDay'] ?? null;
-    $quantityAvailable = $_POST['QuantityAvailable'] ?? null;
-
-    $image = $_FILES['image']['name'] ?? null;
-    if ($image) {
-        $targetDir = "images/";
-        $targetFile = $targetDir . basename($image);
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-            echo "<p style='color: red;'>Error uploading image.</p>";
-            exit();
+    try {
+        // Validate inputs
+        $brand = trim($_POST['brand']);
+        $model = trim($_POST['model']);
+        $category_id = $_POST['category_id'];
+        $wing_type_id = $_POST['wing_type_id'];
+        $price_per_day = floatval($_POST['price_per_day']);
+        $quantity_available = intval($_POST['quantity_available']);
+        
+        // Handle image upload
+        $image_name = '';
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $file_type = $_FILES['image']['type'];
+            
+            if (!in_array($file_type, $allowed_types)) {
+                die("Invalid file type. Only JPG, PNG, GIF, and WebP are allowed.");
+            }
+            
+            $image_name = uniqid() . '_' . basename($_FILES['image']['name']);
+            $upload_dir = 'images/';
+            $upload_path = $upload_dir . $image_name;
+            
+            if (!move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                die("Failed to upload image.");
+            }
+        } else {
+            die("Image upload failed.");
         }
-    } else {
-        $image = "default.jpg"; 
+        
+        // Insert into database
+        $stmt = $pdo->prepare("
+            INSERT INTO drones (Brand, Model, CategoryID, WingTypeID, PricePerDay, QuantityAvailable, ImageURL) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $brand, 
+            $model, 
+            $category_id, 
+            $wing_type_id, 
+            $price_per_day, 
+            $quantity_available, 
+            $image_name
+        ]);
+        
+        logEvent($_SESSION['UserID'], "Added new drone: $brand $model");
+        
+        header('Location: admin_panel.php?success=1');
+        exit();
+        
+    } catch (Exception $e) {
+        die("Error adding drone: " . $e->getMessage());
     }
-    
-    $stmt = $pdo->prepare("INSERT INTO drones (Brand, Model, CategoryID, WingTypeID, PricePerDay, QuantityAvailable, ImageURL) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$brand, $model, $categoryId, $wingTypeId, $pricePerDay, $quantityAvailable, $image]);
-
-    logAction($_SESSION['UserID'], "Added a new drone: $brand $model");
-
+} else {
     header('Location: admin_panel.php');
     exit();
 }

@@ -2,7 +2,7 @@
 session_start();
 require_once 'db.php';
 if (isset($_SESSION['UserID'])) {
-    header("Location: index.php"); // or your dashboard/home
+    header("Location: index.php");
     exit();
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -15,21 +15,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['Password'])) {
-          $_SESSION['UserID'] = $user['UserID'];
-          $_SESSION['Email'] = $user['Email'];
-          $_SESSION['is_admin'] = strpos($user['Email'], 'airerusea@gmail.com') === 0;
-          
-          require_once 'logger.php';
-          logEvent("User logged in: {$user['Email']}");
-          
-          if ($_SESSION['is_admin']) {
-              header("Location: admin_panel.php"); 
-          } else {
-              header("Location: drones.php");
-          }
-          exit();
-          
+        if ($user) {
+            // SMART PASSWORD CHECK: Supports BOTH bcrypt AND plain text
+            $passwordValid = false;
+            
+            // Method 1: Try bcrypt first (for new/upgraded users)
+            if (password_verify($password, $user['Password'])) {
+                $passwordValid = true;
+                
+                // If user was using plain text, upgrade to bcrypt
+                if (strlen($user['Password']) < 50) { // Plain text detected
+                    $newHash = password_hash($password, PASSWORD_DEFAULT);
+                    $upgradeStmt = $pdo->prepare("UPDATE users SET Password = ? WHERE UserID = ?");
+                    $upgradeStmt->execute([$newHash, $user['UserID']]);
+                }
+            }
+            // Method 2: Try plain text (for existing users)
+            elseif ($password === $user['Password']) {
+                $passwordValid = true;
+                
+                // AUTO-UPGRADE: Convert to bcrypt for next login
+                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                $upgradeStmt = $pdo->prepare("UPDATE users SET Password = ? WHERE UserID = ?");
+                $upgradeStmt->execute([$newHash, $user['UserID']]);
+            }
+            
+            if ($passwordValid) {
+                $_SESSION['UserID'] = $user['UserID'];
+                $_SESSION['Email'] = $user['Email'];
+                $_SESSION['is_admin'] = (int)$user['is_admin']; 
+
+                require_once 'logger.php';
+                logEvent("User logged in: {$user['Email']}");
+
+                if ($_SESSION['is_admin']) {
+                    header("Location: admin_panel.php");
+                } else {
+                    header("Location: drones.php");
+                }
+                exit();
+            } else {
+                $error = "Invalid email or password.";
+            }
         } else {
             $error = "Invalid email or password.";
         }

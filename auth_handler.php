@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user && password_verify($password, $user['Password'])) {
         $_SESSION['UserID'] = $user['UserID'];
         $_SESSION['Email'] = $user['Email'];
+        $_SESSION['is_admin'] = $user['is_admin']; // ADD THIS LINE
         logAction($user['UserID'], "Logged in.");
         header('Location: dashboard.php');
         exit();
