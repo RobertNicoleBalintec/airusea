@@ -166,12 +166,13 @@ if (isset($_GET['msg'])) {
 </head>
 <body>
 <header>
-    <nav>
-        <a href="index.php">Home</a> |
-        <?php if (!function_exists('isAdmin') || !isAdmin()): ?><a href="drones.php">Rent A Drone</a> |<?php endif; ?>
-        <a href="dashboard.php">Dashboard</a> |
-        <a href="logout.php" onclick="return confirm('Log out?');">Logout</a>
-    </nav>
+    <div class="header-content">
+        <img src="images/logo.jpg" alt="Airusea Logo" class="logo">
+        <nav class="navbar">
+            <a href="index.php">Home</a>
+            <?php if (!function_exists('isAdmin') || !isAdmin()): ?><a href="drones.php">Rent A Drone</a><?php endif; ?>
+            <a href="logout.php" onclick="return confirm('Log out?');">Logout</a>
+        </nav>
 </header>
 
 <div class="page-container">

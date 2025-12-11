@@ -67,7 +67,6 @@ $rentedStmt->execute();
                 <a href="#rented-drones">Deployed</a>
                 <!-- ADDED: My Rentals Button -->
                 <a href="chest.php" class="my-rentals-btn">My Rentals</a>
-                <a href="dashboard.php">Dashboard</a>
                 <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
             </nav>
         </div>
