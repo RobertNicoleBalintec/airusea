@@ -22,34 +22,24 @@ $display_name = !empty($user['Name']) ? $user['Name'] : $_SESSION['Email'];
 $checkStatusColumn = $pdo->query("SHOW COLUMNS FROM rentals LIKE 'status'");
 $hasStatusColumn = $checkStatusColumn->rowCount() > 0;
 
-// Query for available drones (not currently rented AND not cancelled if status exists)
-if ($hasStatusColumn) {
-    $availableQuery = "
-        SELECT * FROM drones
-        WHERE DroneID NOT IN (
-            SELECT DroneID
-            FROM rentals
-            WHERE RentEnd >= NOW()
-            AND (status IS NULL OR status != 'cancelled')
-        )
-        ORDER BY DroneID DESC
-    ";
-} else {
-    // If no status column, check only date
-    $availableQuery = "
-        SELECT * FROM drones
-        WHERE DroneID NOT IN (
-            SELECT DroneID
-            FROM rentals
-            WHERE RentEnd >= NOW()
-        )
-        ORDER BY DroneID DESC
-    ";
-}
+// Query for available drones (not currently rented AND not phased_out)
+$availableQuery = "
+    SELECT d.* 
+    FROM drones d
+    WHERE d.status = 'available' 
+    AND d.QuantityAvailable > 0
+    AND NOT EXISTS (
+        SELECT 1 FROM rentals r 
+        WHERE r.DroneID = d.DroneID 
+        AND r.RentEnd >= NOW()
+        " . ($hasStatusColumn ? "AND r.status = 'active'" : "") . "
+    )
+    ORDER BY DroneID DESC
+";
 $availableStmt = $pdo->prepare($availableQuery);
 $availableStmt->execute();
 
-// Query for rented drones - check if cancelled
+// Query for rented drones - only show active rentals
 if ($hasStatusColumn) {
     $rentedQuery = "
         SELECT d.*, r.RentalID, r.RentStart, r.RentEnd, u.Email, u.Name as RenterName
@@ -58,7 +48,8 @@ if ($hasStatusColumn) {
         JOIN users u ON r.UserID = u.UserID
         WHERE r.RentEnd >= NOW()
         AND u.UserID IS NOT NULL
-        AND (r.status IS NULL OR r.status != 'cancelled')
+        AND r.status = 'active'
+        AND d.status = 'available'
         ORDER BY r.RentEnd ASC
     ";
 } else {
@@ -94,13 +85,13 @@ if (isAdmin() && $hasStatusColumn) {
     $cancelled_count = 0;
 }
 
-// Get total revenue (last 30 days) - exclude cancelled
+// Get total revenue (last 30 days) - exclude cancelled and expired
 if ($hasStatusColumn) {
     $revenueQuery = "
         SELECT SUM(TotalCost) as total_revenue 
         FROM rentals 
         WHERE RentStart >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        AND (status IS NULL OR status != 'cancelled')
+        AND status = 'active'
     ";
 } else {
     $revenueQuery = "
@@ -113,7 +104,7 @@ $revenueStmt = $pdo->query($revenueQuery);
 $revenue = $revenueStmt->fetch();
 $total_revenue = $revenue['total_revenue'] ?? 0;
 
-// Get active rentals count (only from active users and not cancelled)
+// Get active rentals count (only active rentals, not cancelled or expired)
 if ($hasStatusColumn) {
     $activeRentalsQuery = "
         SELECT COUNT(*) as active_count 
@@ -121,7 +112,7 @@ if ($hasStatusColumn) {
         JOIN users u ON r.UserID = u.UserID
         WHERE r.RentEnd >= NOW()
         AND u.UserID IS NOT NULL
-        AND (r.status IS NULL OR r.status != 'cancelled')
+        AND r.status = 'active'
     ";
 } else {
     $activeRentalsQuery = "
@@ -138,7 +129,7 @@ $active_rentals = $activeRentals['active_count'] ?? 0;
 
 // Only fetch ALL drones if user is NOT admin (for regular users)
 if (!isAdmin()) {
-    $stmt = $pdo->query("SELECT * FROM drones");
+    $stmt = $pdo->query("SELECT * FROM drones WHERE status = 'available'");
 } else {
     $stmt = null; // Admins don't need this query
 }
@@ -592,7 +583,6 @@ if (!isAdmin()) {
                         <div class="drone-info">
                             <h3 class="drone-name"><?php echo htmlspecialchars($drone['Brand']) . ' ' . htmlspecialchars($drone['Model']); ?></h3>
                             <div class="drone-price">Price/Day: ₱<?php echo number_format($drone['PricePerDay'], 2); ?></div>
-                            <!-- Removed the "Manage" button -->
                             <div class="status-indicator status-available">
                                 <i class="fas fa-check-circle"></i> Available for Rent
                             </div>
@@ -771,6 +761,20 @@ if (!isAdmin()) {
         // Function to add status column to database
         function addStatusColumn() {
             if (confirm('This will add a "status" column and "CancelledAt" column to your rentals table. This is required to track cancelled rentals properly. Continue?')) {
+                // Show loading message
+                const container = document.querySelector('.container');
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'db-warning-box';
+                loadingDiv.innerHTML = `
+                    <div class="db-warning-icon">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <div class="db-warning-text">
+                        <strong>Updating database...</strong> Please wait while we add the required columns.
+                    </div>
+                `;
+                container.insertBefore(loadingDiv, container.firstChild.nextSibling);
+                
                 // Create a form to submit the database update
                 const form = document.createElement('form');
                 form.method = 'POST';

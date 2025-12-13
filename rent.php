@@ -1,9 +1,9 @@
 <?php
 session_start();
 require 'db.php'; 
-require 'auth.php'; // ADD THIS LINE
+require 'auth.php';
 
-// PREVENT ADMINS FROM RENTING - ADD THIS CHECK
+// PREVENT ADMINS FROM RENTING
 if (isAdmin()) {
     $_SESSION['error'] = "Administrators cannot rent drones. Please use a regular user account.";
     header("Location: dashboard.php");
@@ -48,7 +48,10 @@ $drone = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$drone) {
     // Check why drone is not available
     $check_query = "SELECT d.*, 
-                    (SELECT COUNT(*) FROM rentals r WHERE r.DroneID = d.DroneID AND r.RentEnd >= NOW() AND r.status = 'active') as active_rentals
+                    (SELECT COUNT(*) FROM rentals r 
+                     WHERE r.DroneID = d.DroneID 
+                     AND r.RentEnd >= NOW() 
+                     AND r.status = 'active') as active_rentals
                     FROM drones d WHERE d.DroneID = :DroneID";
     $check_stmt = $pdo->prepare($check_query);
     $check_stmt->bindParam(':DroneID', $DroneID);
@@ -87,82 +90,89 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $rent_start = $_POST['rent_start'];
         $rent_end = $_POST['rent_end'];
         
-        // Calculate number of days
-        $start_date = new DateTime($rent_start);
-        $end_date = new DateTime($rent_end);
-        $interval = $start_date->diff($end_date);
-        $days = $interval->days;
-        
-        if ($days < 1) {
-            $error_message = "Error: Rental must be at least 1 day.";
+        // Validate dates
+        if (empty($rent_start) || empty($rent_end)) {
+            $error_message = "Error: Please select both start and end dates.";
         } else {
-            // Calculate total cost
-            $totalCost = $drone['PricePerDay'] * $days;
+            // Calculate number of days
+            $start_date = new DateTime($rent_start);
+            $end_date = new DateTime($rent_end);
+            $interval = $start_date->diff($end_date);
+            $days = $interval->days;
             
-            // Use the new process_rent.php logic by posting to it
-            // We'll simulate a POST to process_rent.php
-            
-            // Create a form that auto-submits to process_rent.php
-            echo '<!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <title>Processing Rental...</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background: #f5f7fa;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                        margin: 0;
-                    }
-                    .processing-container {
-                        background: white;
-                        padding: 30px;
-                        border-radius: 10px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                        text-align: center;
-                        max-width: 400px;
-                    }
-                    .spinner {
-                        border: 5px solid #f3f3f3;
-                        border-top: 5px solid #3498db;
-                        border-radius: 50%;
-                        width: 50px;
-                        height: 50px;
-                        animation: spin 1s linear infinite;
-                        margin: 0 auto 20px;
-                    }
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="processing-container">
-                    <div class="spinner"></div>
-                    <h2>Processing Your Rental...</h2>
-                    <p>Please wait while we confirm your rental.</p>
-                </div>
-                <form id="rentalForm" action="process_rent.php" method="POST" style="display: none;">
-                    <input type="hidden" name="rent" value="1">
-                    <input type="hidden" name="drone_id" value="' . $DroneID . '">
-                    <input type="hidden" name="rent_start" value="' . htmlspecialchars($rent_start) . '">
-                    <input type="hidden" name="rent_end" value="' . htmlspecialchars($rent_end) . '">
-                    <input type="hidden" name="PaymentMethodID" value="' . $PaymentMethodID . '">
-                </form>
-                <script>
-                    // Auto-submit the form after 1 second
-                    setTimeout(function() {
-                        document.getElementById("rentalForm").submit();
-                    }, 1000);
-                </script>
-            </body>
-            </html>';
-            exit();
+            if ($days < 1) {
+                $error_message = "Error: Rental must be at least 1 day.";
+            } else if ($start_date < new DateTime()) {
+                $error_message = "Error: Start date cannot be in the past.";
+            } else {
+                // Calculate total cost
+                $totalCost = $drone['PricePerDay'] * $days;
+                
+                // Use the new process_rent.php logic by posting to it
+                // We'll simulate a POST to process_rent.php
+                
+                // Create a form that auto-submits to process_rent.php
+                echo '<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Processing Rental...</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background: #f5f7fa;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                        }
+                        .processing-container {
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                            text-align: center;
+                            max-width: 400px;
+                        }
+                        .spinner {
+                            border: 5px solid #f3f3f3;
+                            border-top: 5px solid #3498db;
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            animation: spin 1s linear infinite;
+                            margin: 0 auto 20px;
+                        }
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="processing-container">
+                        <div class="spinner"></div>
+                        <h2>Processing Your Rental...</h2>
+                        <p>Please wait while we confirm your rental.</p>
+                    </div>
+                    <form id="rentalForm" action="process_rent.php" method="POST" style="display: none;">
+                        <input type="hidden" name="rent" value="1">
+                        <input type="hidden" name="drone_id" value="' . $DroneID . '">
+                        <input type="hidden" name="rent_start" value="' . htmlspecialchars($rent_start) . '">
+                        <input type="hidden" name="rent_end" value="' . htmlspecialchars($rent_end) . '">
+                        <input type="hidden" name="PaymentMethodID" value="' . $PaymentMethodID . '">
+                    </form>
+                    <script>
+                        // Auto-submit the form after 1 second
+                        setTimeout(function() {
+                            document.getElementById("rentalForm").submit();
+                        }, 1000);
+                    </script>
+                </body>
+                </html>';
+                exit();
+            }
         }
     }
 }
@@ -304,14 +314,30 @@ if (isset($error_message)) {
             const pricePerDay = <?php echo $drone['PricePerDay']; ?>;
             const startDate = new Date(document.getElementById('rent_start').value);
             const endDate = new Date(document.getElementById('rent_end').value);
+            const now = new Date();
             
             if (startDate && endDate && startDate < endDate) {
+                if (startDate < now) {
+                    document.getElementById('days_count').textContent = '0';
+                    document.getElementById('total_cost').textContent = '₱0.00';
+                    document.getElementById('date_error').textContent = 'Start date cannot be in the past';
+                    document.getElementById('date_error').style.display = 'block';
+                    
+                    const submitBtn = document.querySelector('button[name="confirm_rental"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '❌ Invalid Dates';
+                    }
+                    return;
+                }
+                
                 const timeDiff = endDate - startDate;
                 const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
                 const totalCost = pricePerDay * days;
                 
                 document.getElementById('days_count').textContent = days;
                 document.getElementById('total_cost').textContent = '₱' + totalCost.toLocaleString('en-PH', {minimumFractionDigits: 2});
+                document.getElementById('date_error').style.display = 'none';
                 
                 // Enable submit button if dates are valid
                 const submitBtn = document.querySelector('button[name="confirm_rental"]');
@@ -322,6 +348,9 @@ if (isset($error_message)) {
             } else {
                 document.getElementById('days_count').textContent = '0';
                 document.getElementById('total_cost').textContent = '₱0.00';
+                document.getElementById('date_error').textContent = 'End date must be after start date';
+                document.getElementById('date_error').style.display = 'block';
+                
                 const submitBtn = document.querySelector('button[name="confirm_rental"]');
                 if (submitBtn) {
                     submitBtn.disabled = true;
@@ -333,9 +362,10 @@ if (isset($error_message)) {
         // Set minimum dates when page loads
         window.onload = function() {
             const now = new Date();
+            const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(9, 0, 0, 0); // Set to 9 AM tomorrow
+            tomorrow.setHours(9, 0, 0, 0);
             
             const threeDaysLater = new Date(tomorrow);
             threeDaysLater.setDate(threeDaysLater.getDate() + 3);
@@ -346,8 +376,8 @@ if (isset($error_message)) {
             };
             
             // Set min dates
-            document.getElementById('rent_start').min = formatDate(new Date(now.getTime() + 60 * 60 * 1000)); // 1 hour from now
-            document.getElementById('rent_end').min = formatDate(new Date(now.getTime() + 2 * 60 * 60 * 1000)); // 2 hours from now
+            document.getElementById('rent_start').min = formatDate(oneHourFromNow);
+            document.getElementById('rent_end').min = formatDate(new Date(oneHourFromNow.getTime() + 60 * 60 * 1000));
             
             // Set default values
             document.getElementById('rent_start').value = formatDate(tomorrow);
@@ -385,27 +415,40 @@ if (isset($error_message)) {
                     ⚡ <?php echo $drone['QuantityAvailable']; ?> units available for rent
                 </div>
                 
+                <?php if (!empty($drone['ImageURL'])): ?>
                 <img src="images/<?php echo htmlspecialchars($drone['ImageURL']); ?>" 
                      alt="Drone Image" 
                      style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin: 15px 0;">
+                <?php endif; ?>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 15px 0;">
+                    <?php if (!empty($drone['CategoryName'])): ?>
                     <div>
                         <strong>Category:</strong><br>
                         <?php echo htmlspecialchars($drone['CategoryName']); ?>
                     </div>
+                    <?php endif; ?>
+                    
+                    <?php if (!empty($drone['MotorTypeName'])): ?>
                     <div>
                         <strong>Motor Type:</strong><br>
                         <?php echo htmlspecialchars($drone['MotorTypeName']); ?>
                     </div>
+                    <?php endif; ?>
+                    
+                    <?php if (!empty($drone['Capacity'])): ?>
                     <div>
                         <strong>Payload:</strong><br>
                         <?php echo htmlspecialchars($drone['Capacity']); ?>
                     </div>
+                    <?php endif; ?>
+                    
+                    <?php if (!empty($drone['SourceType'])): ?>
                     <div>
                         <strong>Power Source:</strong><br>
                         <?php echo htmlspecialchars($drone['SourceType']); ?>
                     </div>
+                    <?php endif; ?>
                 </div>
                 
                 <div style="text-align: center; margin-top: 15px; padding: 15px; background: #e8f4fc; border-radius: 5px;">
@@ -439,6 +482,8 @@ if (isset($error_message)) {
                         <small style="color: #666;">Must be after start date</small>
                     </div>
                 </div>
+                
+                <div id="date_error" style="color: #e74c3c; padding: 10px; background: #f8d7da; border-radius: 5px; display: none; margin-bottom: 15px;"></div>
                 
                 <div class="calculation-box">
                     <h4>📋 Rental Calculation</h4>
