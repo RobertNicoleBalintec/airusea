@@ -145,6 +145,7 @@ html {
     border-color: #ff4d4d;
     background: #ffe6e6;
 }
+
 /*LOGIN FORM CSS*/
 .container-login {
     max-width: 200px;
@@ -401,8 +402,7 @@ main {
     background-color: #a9432a;
 }
 
-
-#available-drones, #rented-drones {
+#available-drones, #rented-drones, #deployed-drones {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 25px;
@@ -410,7 +410,8 @@ main {
 }
 
 #available-drones h2,
-#rented-drones h2 {
+#rented-drones h2,
+#deployed-drones h2 {
     font-size: 32px;
     font-weight: bold;
     color: white;
@@ -449,6 +450,11 @@ main {
     color: #d32f2f;
 }
 
+.drone.deployed {
+    border-left: 5px solid #ffa500;
+    background: rgba(255, 165, 0, 0.15);
+}
+
 .drone h2, .drone h3 {
     margin: 10px 0;
 }
@@ -474,14 +480,24 @@ main {
     background: #a9442c;
 }
 
+.drone a.btn-disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.drone a.btn-disabled:hover {
+    background: #95a5a6;
+}
+
 @media (max-width: 768px) {
-    #available-drones, #rented-drones {
+    #available-drones, #rented-drones, #deployed-drones {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
 }
 
 @media (max-width: 480px) {
-    #available-drones, #rented-drones {
+    #available-drones, #rented-drones, #deployed-drones {
         grid-template-columns: 1fr;
         padding: 10px 0;
     }
@@ -505,4 +521,480 @@ main {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+/* ========== STATUS SYSTEM CSS ========== */
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 90px;
+    text-align: center;
+    margin: 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-available {
+    background-color: #d4edda;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+    box-shadow: 0 2px 4px rgba(21, 87, 36, 0.1);
+}
+
+.status-deployed {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 2px solid #ffeaa7;
+    box-shadow: 0 2px 4px rgba(133, 100, 4, 0.1);
+}
+
+.status-phased-out {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+    box-shadow: 0 2px 4px rgba(114, 28, 36, 0.1);
+}
+
+.status-unavailable {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 2px solid #d6d8db;
+    box-shadow: 0 2px 4px rgba(56, 61, 65, 0.1);
+}
+
+/* Action Buttons */
+.btn-rent {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-rent:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-view {
+    background: #17a2b8;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-view:hover {
+    background: #138496;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-disabled {
+    background: #6c757d !important;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    border: none;
+    cursor: not-allowed !important;
+    text-align: center;
+    opacity: 0.6;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Drone Status Indicators */
+.drone-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-dot-available {
+    background-color: #28a745;
+    box-shadow: 0 0 8px #28a745;
+}
+
+.status-dot-deployed {
+    background-color: #ffc107;
+    box-shadow: 0 0 8px #ffc107;
+}
+
+.status-dot-phased-out {
+    background-color: #dc3545;
+    box-shadow: 0 0 8px #dc3545;
+}
+
+/* Quantity Indicators */
+.quantity-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.quantity-high {
+    background: rgba(40, 167, 69, 0.2);
+    color: #155724;
+    border: 1px solid #28a745;
+}
+
+.quantity-low {
+    background: rgba(255, 193, 7, 0.2);
+    color: #856404;
+    border: 1px solid #ffc107;
+}
+
+.quantity-zero {
+    background: rgba(220, 53, 69, 0.2);
+    color: #721c24;
+    border: 1px solid #dc3545;
+}
+
+/* Section Headers with Status Counts */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    color: white;
+}
+
+.status-count {
+    display: flex;
+    gap: 15px;
+}
+
+.count-badge {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.count-available {
+    background: #28a745;
+    color: white;
+}
+
+.count-deployed {
+    background: #ffc107;
+    color: #212529;
+}
+
+.count-phased {
+    background: #dc3545;
+    color: white;
+}
+
+/* Filter Controls */
+.status-filter {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.filter-all {
+    background: #6c757d;
+    color: white;
+}
+
+.filter-all:hover {
+    background: #5a6268;
+}
+
+.filter-available {
+    background: #28a745;
+    color: white;
+}
+
+.filter-available:hover {
+    background: #218838;
+}
+
+.filter-deployed {
+    background: #ffc107;
+    color: #212529;
+}
+
+.filter-deployed:hover {
+    background: #e0a800;
+}
+
+.filter-phased {
+    background: #dc3545;
+    color: white;
+}
+
+.filter-phased:hover {
+    background: #c82333;
+}
+
+/* Admin Status Styles */
+.admin-status-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
+.status-yes {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-no {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Error and Success Messages */
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+    animation: slideIn 0.5s ease;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 15px 20px;
+    border-radius: 5px;
+    border: 1px solid #c3e6cb;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px 20px;
+    border-radius: 5px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.warning-message {
+    background: #fff3cd;
+    color: #856404;
+    padding: 15px 20px;
+    border-radius: 5px;
+    border: 1px solid #ffeaa7;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.message-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 0 5px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Availability Indicators in Drone Cards */
+.availability-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.stock-info {
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.stock-available {
+    color: #28a745;
+}
+
+.stock-low {
+    color: #ffc107;
+}
+
+.stock-out {
+    color: #dc3545;
+}
+
+/* Responsive adjustments for status system */
+@media (max-width: 768px) {
+    .status-badge {
+        font-size: 0.8em;
+        min-width: 70px;
+        padding: 3px 8px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .status-count {
+        justify-content: center;
+    }
+    
+    .status-filter {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filter-btn {
+        width: 200px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .status-badge {
+        font-size: 0.75em;
+        min-width: 60px;
+    }
+    
+    .message-container {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+}
+
+/* Phase Out Warning */
+.phase-out-warning {
+    background: rgba(220, 53, 69, 0.1);
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    color: #721c24;
+}
+
+.phase-out-warning h4 {
+    margin-top: 0;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Price Change Notice */
+.price-change-notice {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    color: #856404;
+}
+
+.price-change-notice h4 {
+    margin-top: 0;
+    color: #856404;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
