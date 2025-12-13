@@ -73,14 +73,14 @@ $deployedStmt->execute();
             margin: 20px 0;
         }
         .drone {
-            border: 1px solid #ddd;
+            border: 1px solid #fff9f9e2;
             padding: 15px;
             border-radius: 8px;
             width: 250px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .drone.deployed {
-            background-color: #1313138f;
+            background-color: #ff841976;
             border-color: #ffd54f;
         }
         .status-badge {
@@ -96,8 +96,8 @@ $deployedStmt->execute();
             color: #155724;
         }
         .deployed-badge {
-            background-color: #fe8f44ee;
-            color: #856404;
+            background-color: #f87015ef;
+            color: #fdb706f7;
         }
         .btn-disabled {
             background-color: #fd8216cb !important;
