@@ -7,11 +7,11 @@ include('auth.php');
 
 logEvent("Accessed the main page.");
 
-// Show ALL drones instead of just top 6
+// FIXED: Using correct column names from your database
 $stmt = $pdo->query("
-    SELECT d.*, COUNT(r.RentalID) AS rent_count
+    SELECT d.*, COUNT(r.rentID) AS rent_count
     FROM drones d
-    LEFT JOIN rentals r using (DroneID)
+    LEFT JOIN rentals r ON d.DroneID = r.droneID
     GROUP BY d.DroneID
     ORDER BY d.DroneID DESC
 ");

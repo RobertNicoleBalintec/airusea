@@ -1,12 +1,18 @@
 <?php
 session_start();
-session_unset();
+
+// Destroy all session data
+$_SESSION = array();
+
+// Destroy the session cookie
+if (isset($_COOKIE[session_name()])) {
+    setcookie(session_name(), '', time()-3600, '/');
+}
+
+// Destroy the session
 session_destroy();
 
-header("Cache-Control: no-cache, no-store, must-revalidate");
-header("Pragma: no-cache");
-header("Expires: 0");
-
+// Redirect to login page
 header("Location: index_login.php");
 exit();
 ?>
