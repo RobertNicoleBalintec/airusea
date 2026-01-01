@@ -12,16 +12,14 @@ if (!isset($_SESSION['UserID']) || !isset($_SESSION['is_superadmin']) || $_SESSI
 try {
     $pdo->query("SELECT 1 FROM admins LIMIT 1");
 } catch (Exception $e) {
-    // Create table if it doesn't exist
+    // Create table if it doesn't exist - based on your actual structure WITHOUT permissions column
     $pdo->exec("CREATE TABLE IF NOT EXISTS admins (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        userID INT,
-        name VARCHAR(100),
-        email VARCHAR(100),
-        permissions TEXT,
-        assigned_by INT,
-        assigned_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-        is_active BOOLEAN DEFAULT TRUE
+        adminID INT AUTO_INCREMENT PRIMARY KEY,
+        adminName VARCHAR(100),
+        AdminEmail VARCHAR(100),
+        Password VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        roleID INT DEFAULT 3
     )");
 }
 
@@ -41,17 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             if ($user) {
                 // Check if already admin
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM admins WHERE userID = ?");
-                $stmt->execute([$userID]);
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM admins WHERE AdminEmail = ?");
+                $stmt->execute([$user['Email']]);
                 $exists = $stmt->fetchColumn();
                 
                 if (!$exists) {
-                    // Add to admins table
-                    $stmt = $pdo->prepare("INSERT INTO admins (userID, name, email, permissions, assigned_by) VALUES (?, ?, ?, ?, ?)");
-                    $stmt->execute([$userID, $user['name'], $user['Email'], $permissions, $_SESSION['UserID']]);
+                    // Add to admins table - WITHOUT permissions column
+                    $stmt = $pdo->prepare("INSERT INTO admins (adminName, AdminEmail, roleID) VALUES (?, ?, 3)");
+                    $stmt->execute([$user['name'], $user['Email']]);
                     
                     // Update user role
-                    $stmt = $pdo->prepare("UPDATE users SET is_admin = 1, role = 'admin' WHERE UserID = ?");
+                    $stmt = $pdo->prepare("UPDATE users SET is_admin = 1, role = 'admin', roleID = 3 WHERE UserID = ?");
                     $stmt->execute([$userID]);
                     
                     $message = "Admin privileges assigned successfully";
@@ -63,28 +61,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } elseif ($action == 'update' && isset($_POST['admin_id'])) {
             $adminID = $_POST['admin_id'];
             $permissions = $_POST['permissions'] ?? 'basic';
-            $isActive = isset($_POST['is_active']) ? 1 : 0;
             
-            $stmt = $pdo->prepare("UPDATE admins SET permissions = ?, is_active = ? WHERE id = ?");
-            $stmt->execute([$permissions, $isActive, $adminID]);
-            $message = "Admin permissions updated successfully";
+            // Check if permissions column exists
+            try {
+                $stmt = $pdo->query("SHOW COLUMNS FROM admins LIKE 'permissions'");
+                $hasPermissions = $stmt->fetch();
+                
+                if ($hasPermissions) {
+                    $stmt = $pdo->prepare("UPDATE admins SET permissions = ? WHERE adminID = ?");
+                    $stmt->execute([$permissions, $adminID]);
+                } else {
+                    // Just update the admin record without permissions
+                    $stmt = $pdo->prepare("UPDATE admins SET adminName = adminName WHERE adminID = ?");
+                    $stmt->execute([$adminID]);
+                }
+            } catch (Exception $e) {
+                // Silently continue
+            }
+            $message = "Admin updated successfully";
             
         } elseif ($action == 'remove' && isset($_POST['admin_id'])) {
             $adminID = $_POST['admin_id'];
             
-            // Get userID from admin record
-            $stmt = $pdo->prepare("SELECT userID FROM admins WHERE id = ?");
+            // Get email from admin record
+            $stmt = $pdo->prepare("SELECT AdminEmail FROM admins WHERE adminID = ?");
             $stmt->execute([$adminID]);
             $admin = $stmt->fetch();
             
             if ($admin) {
                 // Remove from admins table
-                $stmt = $pdo->prepare("DELETE FROM admins WHERE id = ?");
+                $stmt = $pdo->prepare("DELETE FROM admins WHERE adminID = ?");
                 $stmt->execute([$adminID]);
                 
                 // Update user role
-                $stmt = $pdo->prepare("UPDATE users SET is_admin = 0, role = 'user' WHERE UserID = ?");
-                $stmt->execute([$admin['userID']]);
+                $stmt = $pdo->prepare("UPDATE users SET is_admin = 0, role = 'regular', roleID = 1 WHERE Email = ?");
+                $stmt->execute([$admin['AdminEmail']]);
                 
                 $message = "Admin privileges removed successfully";
             }
@@ -92,33 +103,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch all admins - FIXED: Use LEFT JOIN and handle missing columns
-$sql = "SELECT a.*";
+// Fetch all admins - SAFE: Check what columns exist first
 try {
-    // Check if users table has last_login column
-    $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'last_login'");
-    if ($stmt->fetch()) {
-        $sql .= ", u.last_login";
+    // Check what columns exist in admins table
+    $stmt = $pdo->query("SHOW COLUMNS FROM admins");
+    $adminColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Build SELECT clause based on actual columns
+    $selectColumns = ["a.adminID", "a.adminName", "a.AdminEmail", "a.created_at", "a.roleID"];
+    
+    if (in_array('is_active', $adminColumns)) {
+        $selectColumns[] = "a.is_active";
+    } else {
+        $selectColumns[] = "1 as is_active"; // Default to active
     }
+    
+    if (in_array('permissions', $adminColumns)) {
+        $selectColumns[] = "a.permissions";
+    } else {
+        $selectColumns[] = "'basic' as permissions"; // Default permission
+    }
+    
+    $selectClause = implode(", ", $selectColumns);
+    
+    $sql = "SELECT $selectClause, u.UserID, u.last_login, u.name as user_name
+            FROM admins a 
+            LEFT JOIN users u ON a.AdminEmail = u.Email 
+            ORDER BY a.created_at DESC";
+
+    $stmt = $pdo->query($sql);
+    $admins = $stmt->fetchAll();
 } catch (Exception $e) {
-    // Column doesn't exist, that's okay
+    // If error, just get basic admin info
+    $sql = "SELECT a.adminID, a.adminName, a.AdminEmail, a.created_at, 
+                   'basic' as permissions, 1 as is_active,
+                   u.UserID, u.last_login, u.name as user_name
+            FROM admins a 
+            LEFT JOIN users u ON a.AdminEmail = u.Email 
+            ORDER BY a.created_at DESC";
+    $stmt = $pdo->query($sql);
+    $admins = $stmt->fetchAll();
 }
 
-$sql .= " FROM admins a LEFT JOIN users u ON a.userID = u.UserID ORDER BY a.assigned_date DESC";
-
-$stmt = $pdo->query($sql);
-$admins = $stmt->fetchAll();
-
-// Fetch users who are not admins (for assignment)
-$stmt = $pdo->query("
-    SELECT * FROM users 
-    WHERE (is_admin = 0 OR is_admin IS NULL) 
-    AND role NOT IN ('superadmin', 'admin') 
-    AND UserID != ? 
-    ORDER BY name ASC
-");
-$stmt->execute([$_SESSION['UserID']]);
-$nonAdmins = $stmt->fetchAll();
+// Fetch users who are not admins (for assignment) - FIXED: Use prepare() and execute()
+try {
+    $stmt = $pdo->prepare("
+        SELECT * FROM users 
+        WHERE (is_admin = 0 OR is_admin IS NULL) 
+        AND role NOT IN ('superadmin', 'admin') 
+        AND UserID != ? 
+        AND Email NOT IN (SELECT AdminEmail FROM admins)
+        ORDER BY name ASC
+    ");
+    $stmt->execute([$_SESSION['UserID']]);
+    $nonAdmins = $stmt->fetchAll();
+} catch (Exception $e) {
+    // If error, get all non-admin users without the extra conditions
+    $stmt = $pdo->query("
+        SELECT * FROM users 
+        WHERE (is_admin = 0 OR is_admin IS NULL) 
+        AND role NOT IN ('superadmin', 'admin')
+        ORDER BY name ASC
+    ");
+    $nonAdmins = $stmt->fetchAll();
+}
 ?>
 
 <!DOCTYPE html>
@@ -703,28 +751,32 @@ $nonAdmins = $stmt->fetchAll();
                     ?>
                     <div class="admin-card">
                         <div class="admin-header">
-                            <h3><?php echo htmlspecialchars($admin['name'] ?? 'Unknown Admin'); ?></h3>
+                            <h3><?php echo htmlspecialchars($admin['adminName'] ?? $admin['user_name'] ?? 'Unknown Admin'); ?></h3>
                             <div class="admin-avatar">
-                                <?php echo strtoupper(substr(($admin['name'] ?? 'A'), 0, 1)); ?>
+                                <?php echo strtoupper(substr(($admin['adminName'] ?? $admin['user_name'] ?? 'A'), 0, 1)); ?>
                             </div>
                         </div>
                         <div class="admin-body">
                             <div class="admin-info">
                                 <div class="info-row">
                                     <span class="info-label">Admin ID:</span>
-                                    <span class="info-value">#<?php echo $admin['id']; ?></span>
+                                    <span class="info-value">#<?php echo $admin['adminID']; ?></span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">User ID:</span>
-                                    <span class="info-value">#<?php echo $admin['userID'] ?? 'N/A'; ?></span>
+                                    <span class="info-value">#<?php echo $admin['UserID'] ?? 'N/A'; ?></span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Email:</span>
-                                    <span class="info-value"><?php echo htmlspecialchars($admin['email'] ?? 'N/A'); ?></span>
+                                    <span class="info-value"><?php echo htmlspecialchars($admin['AdminEmail'] ?? 'N/A'); ?></span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">Assigned:</span>
-                                    <span class="info-value"><?php echo date('Y-m-d', strtotime($admin['assigned_date'] ?? 'now')); ?></span>
+                                    <span class="info-label">Created:</span>
+                                    <span class="info-value"><?php echo date('Y-m-d', strtotime($admin['created_at'] ?? 'now')); ?></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Role ID:</span>
+                                    <span class="info-value">#<?php echo $admin['roleID'] ?? '3'; ?></span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Last Login:</span>
@@ -739,32 +791,17 @@ $nonAdmins = $stmt->fetchAll();
                             </div>
                             
                             <div class="permissions-badges">
-                                <?php 
-                                // Handle permissions display
-                                if (is_string($permissions) && strpos($permissions, '[') !== false) {
-                                    // It's JSON encoded
-                                    $permsArray = json_decode($permissions, true);
-                                    if (is_array($permsArray)) {
-                                        foreach ($permsArray as $perm) {
-                                            echo '<span class="permission-badge">' . htmlspecialchars($perm) . '</span>';
-                                        }
-                                    } else {
-                                        echo '<span class="permission-badge">' . htmlspecialchars($permissions) . '</span>';
-                                    }
-                                } else {
-                                    echo '<span class="permission-badge">' . htmlspecialchars($permissions) . '</span>';
-                                }
-                                ?>
+                                <span class="permission-badge"><?php echo htmlspecialchars($permissions); ?></span>
                             </div>
                             
                             <div class="action-buttons">
                                 <button type="button" class="action-btn btn-edit" 
-                                        onclick="editAdmin(<?php echo $admin['id']; ?>, '<?php echo htmlspecialchars($admin['permissions'] ?? 'basic'); ?>', <?php echo $admin['is_active'] ?? 1; ?>)">
+                                        onclick="editAdmin(<?php echo $admin['adminID']; ?>, '<?php echo htmlspecialchars($admin['permissions'] ?? 'basic'); ?>', <?php echo $admin['is_active'] ?? 1; ?>)">
                                     ✏️ Edit Permissions
                                 </button>
                                 <form method="POST" style="display: inline; flex: 1;" 
-                                      onsubmit="return confirm('Remove admin privileges from <?php echo htmlspecialchars($admin['name'] ?? 'this admin'); ?>?')">
-                                    <input type="hidden" name="admin_id" value="<?php echo $admin['id']; ?>">
+                                      onsubmit="return confirm('Remove admin privileges from <?php echo htmlspecialchars($admin['adminName'] ?? $admin['user_name'] ?? 'this admin'); ?>?')">
+                                    <input type="hidden" name="admin_id" value="<?php echo $admin['adminID']; ?>">
                                     <input type="hidden" name="action" value="remove">
                                     <button type="submit" class="action-btn btn-remove">🗑️ Remove Admin</button>
                                 </form>

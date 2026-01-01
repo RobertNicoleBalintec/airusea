@@ -18,28 +18,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['filter'])) {
     $endDate = $_POST['end_date'] ?? $endDate;
 }
 
-// Fetch report data
-$reports = [];
+// Initialize variables
+$financial = ['total_rentals' => 0, 'total_revenue' => 0, 'collected_revenue' => 0, 
+              'overdue_count' => 0, 'potential_penalties' => 0];
+$recentRentals = [];
+$droneStats = ['total_drones' => 0, 'avg_rental_price' => 0, 
+               'available_drones' => 0, 'rented_drones' => 0];
 
-// Check what tables exist and adjust queries accordingly
+// Check if rentals table exists
 try {
-    // Check if rentals table exists
     $rentalsExist = $pdo->query("SHOW TABLES LIKE 'rentals'")->fetch();
     
     if ($rentalsExist) {
-        // FIXED: Use correct column names for rentals table
-        // First, let's check the structure of rentals table
+        // Check what columns exist in rentals table
         $stmt = $pdo->query("SHOW COLUMNS FROM rentals");
         $rentalColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
-        // Determine which columns exist
-        $priceColumn = in_array('price', $rentalColumns) ? 'price' : 
-                      (in_array('rental_price', $rentalColumns) ? 'rental_price' : 'amount');
+        // Determine which price column exists
+        if (in_array('totalprice', $rentalColumns)) {
+            $priceColumn = 'totalprice';
+        } else {
+            $priceColumn = '0'; // Default if no price column
+        }
         
-        $dateColumn = in_array('rental_date', $rentalColumns) ? 'rental_date' : 
-                     (in_array('created_at', $rentalColumns) ? 'created_at' : 'date');
+        // Determine which date column exists
+        if (in_array('rentstart', $rentalColumns)) {
+            $dateColumn = 'rentstart';
+        } elseif (in_array('created_at', $rentalColumns)) {
+            $dateColumn = 'created_at';
+        } else {
+            $dateColumn = 'NOW()'; // Default if no date column
+        }
         
-        // Financial Summary
+        // Financial Summary - SAFE: Use determined column names
         $sql = "
             SELECT 
                 COUNT(*) as total_rentals,
@@ -53,62 +64,82 @@ try {
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$startDate, $endDate]);
-        $financial = $stmt->fetch();
+        $financial = $stmt->fetch() ?: $financial;
         
-        // Recent rentals for police reports
-        $sql = "
-            SELECT r.*, u.name as user_name, u.Email as user_email, d.drone_name
-            FROM rentals r
-            JOIN users u ON r.userID = u.UserID
-            LEFT JOIN drones d ON r.droneID = d.droneID
-            WHERE r.$dateColumn BETWEEN ? AND ?
-            ORDER BY r.$dateColumn DESC
-            LIMIT 50
-        ";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$startDate, $endDate]);
-        $recentRentals = $stmt->fetchAll();
-    } else {
-        $financial = ['total_rentals' => 0, 'total_revenue' => 0, 'collected_revenue' => 0, 
-                      'overdue_count' => 0, 'potential_penalties' => 0];
-        $recentRentals = [];
+        // Recent rentals for police reports (simplified to avoid column errors)
+        try {
+            $sql = "
+                SELECT r.*, u.name as user_name, u.Email as user_email
+                FROM rentals r
+                JOIN users u ON r.userID = u.UserID
+                WHERE r.$dateColumn BETWEEN ? AND ?
+                ORDER BY r.$dateColumn DESC
+                LIMIT 50
+            ";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$startDate, $endDate]);
+            $recentRentals = $stmt->fetchAll();
+        } catch (Exception $e) {
+            // If there's an error in the join, just get rentals
+            $sql = "SELECT * FROM rentals WHERE $dateColumn BETWEEN ? AND ? ORDER BY $dateColumn DESC LIMIT 50";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$startDate, $endDate]);
+            $recentRentals = $stmt->fetchAll();
+        }
     }
 } catch (Exception $e) {
-    // If there's an error, set defaults
-    $financial = ['total_rentals' => 0, 'total_revenue' => 0, 'collected_revenue' => 0, 
-                  'overdue_count' => 0, 'potential_penalties' => 0];
-    $recentRentals = [];
+    // Silently continue with defaults
 }
 
 // User Activity
-$stmt = $pdo->prepare("
-    SELECT 
-        COUNT(*) as new_users,
-        SUM(CASE WHEN last_login IS NOT NULL AND last_login >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as active_users_7d,
-        SUM(CASE WHEN last_login IS NOT NULL AND last_login >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 ELSE 0 END) as active_users_30d
-    FROM users
-    WHERE created_at BETWEEN ? AND ?
-");
-$stmt->execute([$startDate, $endDate]);
-$userActivity = $stmt->fetch();
-
-// Drone Statistics
-$dronesExist = $pdo->query("SHOW TABLES LIKE 'drones'")->fetch();
-if ($dronesExist) {
+try {
     $stmt = $pdo->prepare("
         SELECT 
-            COUNT(*) as total_drones,
-            AVG(rental_price) as avg_rental_price,
-            SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_drones,
-            SUM(CASE WHEN status = 'rented' THEN 1 ELSE 0 END) as rented_drones
-        FROM drones
+            COUNT(*) as new_users,
+            SUM(CASE WHEN last_login IS NOT NULL AND last_login >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as active_users_7d,
+            SUM(CASE WHEN last_login IS NOT NULL AND last_login >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 ELSE 0 END) as active_users_30d
+        FROM users
+        WHERE created_at BETWEEN ? AND ?
     ");
-    $stmt->execute();
-    $droneStats = $stmt->fetch();
-} else {
-    $droneStats = ['total_drones' => 0, 'avg_rental_price' => 0, 
-                   'available_drones' => 0, 'rented_drones' => 0];
+    $stmt->execute([$startDate, $endDate]);
+    $userActivity = $stmt->fetch();
+} catch (Exception $e) {
+    $userActivity = ['new_users' => 0, 'active_users_7d' => 0, 'active_users_30d' => 0];
+}
+
+// Drone Statistics - FIXED: Check if drones table has rental_price column
+$dronesExist = $pdo->query("SHOW TABLES LIKE 'drones'")->fetch();
+if ($dronesExist) {
+    try {
+        // Check what columns exist in drones table
+        $stmt = $pdo->query("SHOW COLUMNS FROM drones");
+        $droneColumns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        // Determine which price column exists
+        if (in_array('rental_price', $droneColumns)) {
+            $dronePriceColumn = 'AVG(rental_price) as avg_rental_price';
+        } elseif (in_array('price', $droneColumns)) {
+            $dronePriceColumn = 'AVG(price) as avg_rental_price';
+        } else {
+            $dronePriceColumn = '0 as avg_rental_price';
+        }
+        
+        $sql = "
+            SELECT 
+                COUNT(*) as total_drones,
+                $dronePriceColumn,
+                SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_drones,
+                SUM(CASE WHEN status = 'rented' THEN 1 ELSE 0 END) as rented_drones
+            FROM drones
+        ";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $droneStats = $stmt->fetch() ?: $droneStats;
+    } catch (Exception $e) {
+        // Silently continue with defaults
+    }
 }
 ?>
 
@@ -406,12 +437,6 @@ if ($dronesExist) {
         
         .back-btn:hover {
             background: #545b62;
-        }
-        
-        .chart-container {
-            height: 300px;
-            margin-top: 20px;
-            position: relative;
         }
         
         .quick-stats {
@@ -718,10 +743,9 @@ if ($dronesExist) {
                                 <tr>
                                     <th>Rental ID</th>
                                     <th>User</th>
-                                    <th>Drone</th>
-                                    <th>Rental Date</th>
-                                    <th>Return Date</th>
-                                    <th>Amount</th>
+                                    <th>Rental Start</th>
+                                    <th>Rental End</th>
+                                    <th>Total Price</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -732,29 +756,32 @@ if ($dronesExist) {
                                     $statusClass = "status-" . $status;
                                 ?>
                                 <tr>
-                                    <td>#<?php echo $rental['rentalID'] ?? $rental['id'] ?? 'N/A'; ?></td>
+                                    <td>#<?php echo $rental['rentD'] ?? $rental['rentalID'] ?? 'N/A'; ?></td>
                                     <td>
-                                        <div><strong><?php echo htmlspecialchars($rental['user_name'] ?? 'Unknown'); ?></strong></div>
+                                        <?php if (isset($rental['user_name'])): ?>
+                                        <div><strong><?php echo htmlspecialchars($rental['user_name']); ?></strong></div>
                                         <div style="font-size: 12px; color: #7f8c8d;"><?php echo htmlspecialchars($rental['user_email'] ?? ''); ?></div>
+                                        <?php else: ?>
+                                        User #<?php echo $rental['userID'] ?? 'N/A'; ?>
+                                        <?php endif; ?>
                                     </td>
-                                    <td><?php echo htmlspecialchars($rental['drone_name'] ?? 'Unknown Drone'); ?></td>
                                     <td>
                                         <?php 
-                                        $rentalDate = $rental['rental_date'] ?? $rental['created_at'] ?? 'N/A';
+                                        $rentalDate = $rental['rentstart'] ?? $rental['rental_date'] ?? 'N/A';
                                         echo $rentalDate !== 'N/A' ? date('Y-m-d', strtotime($rentalDate)) : 'N/A';
                                         ?>
                                     </td>
                                     <td>
-                                        <?php if (isset($rental['return_date']) && $rental['return_date']): ?>
-                                            <?php echo date('Y-m-d', strtotime($rental['return_date'])); ?>
+                                        <?php if (isset($rental['rendue']) && $rental['rendue']): ?>
+                                            <?php echo date('Y-m-d', strtotime($rental['rendue'])); ?>
                                         <?php else: ?>
                                             <em>Not returned</em>
                                         <?php endif; ?>
                                     </td>
-                                    <td><strong>$<?php echo number_format($rental['price'] ?? $rental['rental_price'] ?? $rental['amount'] ?? 0, 2); ?></strong></td>
+                                    <td><strong>$<?php echo number_format($rental['totalprice'] ?? 0, 2); ?></strong></td>
                                     <td><span class="status-badge <?php echo $statusClass; ?>"><?php echo ucfirst($status); ?></span></td>
                                     <td>
-                                        <button onclick="generatePoliceReport(<?php echo $rental['rentalID'] ?? $rental['id'] ?? 0; ?>)" 
+                                        <button onclick="generatePoliceReport(<?php echo $rental['rentD'] ?? $rental['rentalID'] ?? 0; ?>)" 
                                                 class="export-btn btn-pdf" style="padding: 5px 10px; font-size: 12px;">
                                             👮 Generate Report
                                         </button>

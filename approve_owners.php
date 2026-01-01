@@ -14,7 +14,7 @@ try {
 } catch (Exception $e) {
     // Create table if it doesn't exist
     $pdo->exec("CREATE TABLE IF NOT EXISTS owner_requests (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        requestID INT AUTO_INCREMENT PRIMARY KEY,
         userID INT,
         name VARCHAR(100),
         email VARCHAR(100),
@@ -47,11 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if ($action == 'approve') {
             // Update request status
-            $stmt = $pdo->prepare("UPDATE owner_requests SET status = 'approved', approved_by = ?, approved_date = NOW(), notes = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE owner_requests SET status = 'approved', approved_by = ?, approved_date = NOW(), notes = ? WHERE requestID = ?");
             $stmt->execute([$_SESSION['UserID'], $notes, $requestID]);
             
             // Get user info from request
-            $stmt = $pdo->prepare("SELECT userID, email FROM owner_requests WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT userID, email FROM owner_requests WHERE requestID = ?");
             $stmt->execute([$requestID]);
             $request = $stmt->fetch();
             
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $message = "Owner request approved successfully";
             
         } elseif ($action == 'reject') {
-            $stmt = $pdo->prepare("UPDATE owner_requests SET status = 'rejected', approved_by = ?, approved_date = NOW(), notes = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE owner_requests SET status = 'rejected', approved_by = ?, approved_date = NOW(), notes = ? WHERE requestID = ?");
             $stmt->execute([$_SESSION['UserID'], $notes, $requestID]);
             $message = "Owner request rejected";
         }
@@ -72,11 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch pending owner requests - FIXED: Use correct column name
-$stmt = $pdo->query("SELECT * FROM owner_requests WHERE status = 'pending' ORDER BY id DESC");
+$stmt = $pdo->query("SELECT * FROM owner_requests WHERE status = 'pending' ORDER BY requestID DESC");
 $requests = $stmt->fetchAll();
 
 // Fetch all requests for history
-$stmt = $pdo->query("SELECT * FROM owner_requests ORDER BY id DESC");
+$stmt = $pdo->query("SELECT * FROM owner_requests ORDER BY requestID DESC");
 $allRequests = $stmt->fetchAll();
 ?>
 
@@ -403,37 +403,48 @@ $allRequests = $stmt->fetchAll();
                     <div class="requests-grid">
                         <?php foreach ($requests as $request): 
                             // Safely get date
-                            $requestDate = $request['request_date'] ?? date('Y-m-d H:i:s');
+                            $requestDate = $request['submitted_at'] ?? date('Y-m-d H:i:s');
                         ?>
                         <div class="request-card">
                             <div class="request-header">
-                                <h3>Request #<?php echo $request['id']; ?></h3>
+                                <h3>Request #<?php echo $request['requestID']; ?></h3>
                                 <span class="status-badge status-pending">Pending</span>
                             </div>
                             <div class="request-body">
                                 <div class="request-info">
                                     <div class="info-row">
                                         <span class="info-label">Applicant:</span>
-                                        <span class="info-value"><?php echo htmlspecialchars($request['name']); ?></span>
+                                        <span class="info-value"><?php echo htmlspecialchars($request['name'] ?? 'N/A'); ?></span>
                                     </div>
                                     <div class="info-row">
                                         <span class="info-label">Email:</span>
-                                        <span class="info-value"><?php echo htmlspecialchars($request['email']); ?></span>
+                                        <span class="info-value"><?php echo htmlspecialchars($request['email'] ?? 'N/A'); ?></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">User ID:</span>
+                                        <span class="info-value"><?php echo $request['userID'] ?? 'N/A'; ?></span>
                                     </div>
                                     <div class="info-row">
                                         <span class="info-label">Request Date:</span>
                                         <span class="info-value"><?php echo date('Y-m-d H:i', strtotime($requestDate)); ?></span>
                                     </div>
-                                    <?php if (isset($request['userID']) && $request['userID']): ?>
+                                    <?php if (isset($request['drone_count'])): ?>
                                     <div class="info-row">
-                                        <span class="info-label">User ID:</span>
-                                        <span class="info-value">#<?php echo $request['userID']; ?></span>
+                                        <span class="info-label">Drones to Add:</span>
+                                        <span class="info-value"><?php echo $request['drone_count']; ?></span>
                                     </div>
                                     <?php endif; ?>
                                 </div>
                                 
+                                <?php if (isset($request['drone_details_text'])): ?>
+                                <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                    <strong>Drone Details:</strong>
+                                    <p><?php echo nl2br(htmlspecialchars($request['drone_details_text'])); ?></p>
+                                </div>
+                                <?php endif; ?>
+                                
                                 <form method="POST">
-                                    <input type="hidden" name="request_id" value="<?php echo $request['id']; ?>">
+                                    <input type="hidden" name="request_id" value="<?php echo $request['requestID']; ?>">
                                     <textarea name="notes" class="notes-input" placeholder="Add notes (optional)..." rows="2"></textarea>
                                     <div class="action-buttons">
                                         <button type="submit" name="action" value="approve" class="action-btn btn-approve" onclick="return confirm('Approve this owner request?')">✅ Approve</button>
@@ -461,39 +472,39 @@ $allRequests = $stmt->fetchAll();
                                 <th>ID</th>
                                 <th>Applicant</th>
                                 <th>Email</th>
+                                <th>User ID</th>
                                 <th>Request Date</th>
                                 <th>Status</th>
-                                <th>Approved/Rejected By</th>
-                                <th>Date</th>
-                                <th>Notes</th>
+                                <th>Reviewed By</th>
+                                <th>Review Date</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($allRequests as $req): 
-                                $statusClass = "status-" . $req['status'];
-                                $requestDate = $req['request_date'] ?? date('Y-m-d H:i:s');
+                                $statusClass = "status-" . ($req['status'] ?? 'pending');
+                                $requestDate = $req['submitted_at'] ?? date('Y-m-d H:i:s');
                             ?>
                             <tr>
-                                <td>#<?php echo $req['id']; ?></td>
-                                <td><?php echo htmlspecialchars($req['name']); ?></td>
-                                <td><?php echo htmlspecialchars($req['email']); ?></td>
+                                <td>#<?php echo $req['requestID']; ?></td>
+                                <td><?php echo htmlspecialchars($req['name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($req['email'] ?? 'N/A'); ?></td>
+                                <td><?php echo $req['userID'] ?? 'N/A'; ?></td>
                                 <td><?php echo date('Y-m-d', strtotime($requestDate)); ?></td>
-                                <td><span class="status-badge <?php echo $statusClass; ?>"><?php echo ucfirst($req['status']); ?></span></td>
+                                <td><span class="status-badge <?php echo $statusClass; ?>"><?php echo ucfirst($req['status'] ?? 'pending'); ?></span></td>
                                 <td>
-                                    <?php if (isset($req['approved_by']) && $req['approved_by']): ?>
-                                        Admin #<?php echo $req['approved_by']; ?>
+                                    <?php if (isset($req['reviewed_by']) && $req['reviewed_by']): ?>
+                                        Admin #<?php echo $req['reviewed_by']; ?>
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if (isset($req['approved_date']) && $req['approved_date']): ?>
-                                        <?php echo date('Y-m-d', strtotime($req['approved_date'])); ?>
+                                    <?php if (isset($req['reviewed_at']) && $req['reviewed_at']): ?>
+                                        <?php echo date('Y-m-d', strtotime($req['reviewed_at'])); ?>
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo htmlspecialchars($req['notes'] ?? '-'); ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
