@@ -505,7 +505,7 @@ $lastLogin = isset($user['last_login']) && $user['last_login'] ? $user['last_log
                 
                 <a href="approve_owners.php" class="function-card">
                     <h3>✅ Approve Owner Requests</h3>
-                    <p>Review and approve/reject user requests to become drone owners. From your flowchart.</p>
+                    <p>Review and approve/reject user requests to become drone owners.</p>
                     <span class="btn">Review Requests</span>
                 </a>
                 
@@ -517,7 +517,7 @@ $lastLogin = isset($user['last_login']) && $user['last_login'] ? $user['last_log
                 
                 <a href="set_penalties.php" class="function-card">
                     <h3>💰 Set Overdue Penalties</h3>
-                    <p>Configure penalty rates per day for overdue drone returns. From your flowchart.</p>
+                    <p>Configure penalty rates per day for overdue drone returns.</p>
                     <span class="btn">Set Penalties</span>
                 </a>
                 
@@ -539,10 +539,7 @@ $lastLogin = isset($user['last_login']) && $user['last_login'] ? $user['last_log
                 <div class="action-buttons">
                     <a href="reset_superadmin.php" class="action-btn emergency">Reset Password</a>
                     <a href="system_settings.php" class="action-btn normal">System Settings</a>
-                    <a href="audit_logs.php" class="action-btn info">Audit Logs</a>
-                    <a href="backup.php" class="action-btn normal">Backup System</a>
                     <a href="logs.php" class="action-btn info">View Logs</a>
-                    <a href="emergency_login.php" class="action-btn emergency">Emergency Login</a>
                 </div>
             </div>
         </div>
